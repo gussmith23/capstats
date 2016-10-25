@@ -9,7 +9,7 @@ void post_method_handler( const shared_ptr< Session > session )
 {
     const auto request = session->get_request( );
 
-    auto content_length = request->get_header( "Content-Length", 0 );
+    int content_length = stoi(request->get_header( "Content-Length", "0" ));
 
     session->fetch( content_length, [ ]( const shared_ptr< Session > session, const Bytes & body )
     {
@@ -25,7 +25,7 @@ int main( const int, const char** )
     resource->set_method_handler( "POST", post_method_handler );
 
     auto settings = make_shared< Settings >( );
-    settings->set_port( 1984 );
+    settings->set_port( 23232 );
     settings->set_default_header( "Connection", "close" );
 
     Service service;

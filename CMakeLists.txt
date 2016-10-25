@@ -15,3 +15,7 @@ target_link_libraries(capstats_server ${restbed_LIBRARY})
 
 # otl
 include_directories(${restbed_INCLUDE})
+
+# catch
+add_library(Catch INTERFACE)
+target_include_directories(Catch INTERFACE "${CMAKE_SOURCE_DIR}/dependency/catch")

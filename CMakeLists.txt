@@ -10,12 +10,16 @@ include_directories("${CMAKE_SOURCE_DIR}/src")
 
 # restbed
 find_package(restbed REQUIRED)
-include_directories("${CMAKE_SOURCE_DIR}/dependency/otl")
+include_directories(${restbed_INCLUDE})
 target_link_libraries(capstats_server ${restbed_LIBRARY})
 
 # otl
-include_directories(${restbed_INCLUDE})
+include_directories("${CMAKE_SOURCE_DIR}/dependency/otl")
 
 # catch
 add_library(Catch INTERFACE)
 target_include_directories(Catch INTERFACE "${CMAKE_SOURCE_DIR}/dependency/catch")
+
+# odbc
+find_package(odbc REQUIRED)
+target_link_libraries(capstats_server ${ODBC_LIBRARIES})

@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.6)
 
 project(capstats)
-add_executable(capstats_server src/capstats_server.cpp src/game.cpp
-								src/player.cpp)
+file(GLOB CAPSTATS_SOURCES "src/*.cpp")
+add_executable(capstats_server "${CAPSTATS_SOURCES}")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 

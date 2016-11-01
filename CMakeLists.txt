@@ -23,3 +23,6 @@ target_include_directories(Catch INTERFACE "${CMAKE_SOURCE_DIR}/dependency/catch
 # odbc
 find_package(odbc REQUIRED)
 target_link_libraries(capstats_server ${ODBC_LIBRARIES})
+
+# JsonBox
+find_package(JsonBox REQUIRED)

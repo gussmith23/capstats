@@ -16,7 +16,9 @@ set(FIND_JSONBOX_PATHS
     /sw
     /opt/local
     /opt/csw
-    /opt)
+    /opt
+    "/Program Files (x86)/JsonBox"
+    "/Program Files/JsonBox")
 
 if(JSONBOX_ROOT)
 	SET(JSONBOX_INCLUDE_DIR "${JSONBOX_ROOT}/include")
@@ -29,15 +31,20 @@ find_path(JSONBOX_INCLUDE_DIR JsonBox/include/JsonBox.h
           PATHS ${FIND_JSONBOX_PATHS})
 
 find_library(JSONBOX_LIBRARY
-		NAMES JsonBox
+		NAMES JsonBox 
 		PATH_SUFFIXES lib
 		PATHS ${FIND_JSONBOX_PATHS})
-
+    
+find_library(JSONBOX_LIBRARY_DEBUG
+		NAMES JsonBox_d
+		PATH_SUFFIXES lib
+		PATHS ${FIND_JSONBOX_PATHS})
+  
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(JSONBOX DEFAULT_MSG JSONBOX_LIBRARY JSONBOX_INCLUDE_DIR)
 
 set(JSONBOX_INCLUDE_DIR "${JSONBOX_INCLUDE_DIR}")
-set(JSONBOX_LIBRARIES "${JSONBOX_LIBRARY}")
+set(JSONBOX_LIBRARIES optimized "${JSONBOX_LIBRARY}" debug "${JSONBOX_LIBRARY_DEBUG}")
 
 if(NOT JSONBOX_FOUND)
 	set(FIND_JSONBOX_ERROR "Could NOT find JSONBOX")

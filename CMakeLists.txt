@@ -26,3 +26,5 @@ target_link_libraries(capstats_server ${ODBC_LIBRARIES})
 
 # JsonBox
 find_package(JsonBox REQUIRED)
+include_directories(${JSONBOX_INCLUDE_DIR})
+target_link_libraries(capstats_server ${JSONBOX_LIBRARIES})

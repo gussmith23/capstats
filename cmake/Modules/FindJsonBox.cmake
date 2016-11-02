@@ -26,8 +26,8 @@ if(JSONBOX_ROOT)
 	SET(JSONBOX_FOUND 1)
 endif(JSONBOX_ROOT)
 
-find_path(JSONBOX_INCLUDE_DIR JsonBox/include/JsonBox.h
-          PATH_SUFFIXES include
+find_path(JSONBOX_INCLUDE_DIR JsonBox.h
+          PATH_SUFFIXES include JsonBox/include 
           PATHS ${FIND_JSONBOX_PATHS})
 
 find_library(JSONBOX_LIBRARY

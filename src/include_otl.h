@@ -1,4 +1,5 @@
 #define OTL_CPP_11_ON
+#define OTL_STL
 #define OTL_ODBC // Compile OTL 4.0/ODBC
 //#define ODBCVER 0x0250 // ODBC Version # needs to be downgraded
 // to 2.5 because the SQLite ODBC driver seems

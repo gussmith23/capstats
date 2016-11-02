@@ -5,16 +5,17 @@
 
 class Player {
 public:
-	Player(unsigned int id) : Player(id, "") {}
-	Player(unsigned int id, std::string name) : id(id), name(name) {}
+	Player(unsigned int telegramId, std::string name) : telegramId(telegramId), name(name) {}
 
-	const unsigned int id;
+	inline std::string getName() const { return name; }
+	inline void setName(const std::string new_name) { name = new_name; }
 
-	std::string getName() { return name; }
-	void setName(std::string new_name) { name = new_name; }
+	inline unsigned int getTelegramId() const { return telegramId; }
+	inline void setTelegramId(const unsigned int newTelegramId) { telegramId = newTelegramId; }
 
 private:
 	std::string name;
+	unsigned int telegramId;
 };
 
 #endif

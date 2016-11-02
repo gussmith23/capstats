@@ -34,6 +34,11 @@ void post_method_handler( const shared_ptr< Session > session )
     } );
 }
 
+void post_add_user_handler(const shared_ptr<Session> session)
+{
+
+}
+
 int main( const int, const char** )
 {
 	// Setup db.

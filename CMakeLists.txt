@@ -8,6 +8,10 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 include_directories("${CMAKE_SOURCE_DIR}/src")
 
+# Native threads
+find_package(Threads REQUIRED)
+target_link_libraries(capstats_server Threads::Threads)
+
 # restbed
 find_package(restbed REQUIRED)
 include_directories(${restbed_INCLUDE})

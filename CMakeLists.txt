@@ -32,7 +32,6 @@ target_link_libraries(capstats_server ${JSONBOX_LIBRARIES})
 # tests
 file(GLOB CAPSTATS_TEST_SOURCES "test/*.cpp" "src/*")
 list(REMOVE_ITEM CAPSTATS_TEST_SOURCES "${CMAKE_SOURCE_DIR}/src/capstats_server.cpp")
-message(${CAPSTATS_TEST_SOURCES})
 add_executable(capstats_tests ${CAPSTATS_TEST_SOURCES})
 target_link_libraries(capstats_tests Catch)
 target_link_libraries(capstats_tests ${restbed_LIBRARY})

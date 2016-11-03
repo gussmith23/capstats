@@ -68,15 +68,17 @@ void get_user_handler(const shared_ptr<Session> session)
 	session->close(OK, response_body, { { "Content-Length", to_string(response_body.length()) },{ "Content-Type", "application/json" } });
 }
 
-void get_user_http(const shared_ptr<Session> session)
+void get_user_html(const shared_ptr<Session> session)
 {
 	const auto request = session->get_request();
 	const unsigned int telegramId = stoi(request->get_query_parameter("telegramId"));
 
 	Player player = playerDAO.getPlayer(telegramId);
 
-	string out_html = "<h1>" + player.getName() + "</h1><p><b>Telegram ID:</b>" + "</p>";
+	string out_html = "<h1>" + player.getName() + "</h1><p><b>Telegram ID:</b>"  + to_string(player.getTelegramId()) + "</p>";
 
+	out_html += "<form action='player' method='post'><input type='text' name='name'><input type ='text' name='telegramId'><input type='submit'></form>";
+	session->close(OK, out_html, { { "Content-Length", to_string(out_html.length()) },{ "Content-Type", "text/html" } });
 }
 
 int main( const int, const char** )
@@ -99,6 +101,7 @@ int main( const int, const char** )
 	user->set_path("/player");
 	user->set_method_handler("GET", get_user_handler);
 	user->set_method_handler("POST", post_user_handler);
+	//user->set_method_handler("GET", { {"Accept","text/html"} }, get_user_html);
 
 
     auto settings = make_shared< Settings >( );

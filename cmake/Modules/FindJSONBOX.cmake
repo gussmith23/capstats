@@ -17,8 +17,8 @@ set(FIND_JSONBOX_PATHS
     /opt/local
     /opt/csw
     /opt
-    "/Program Files (x86)/JsonBox"
-    "/Program Files/JsonBox")
+    "/Program Files (x86)"
+    "/Program Files")
 
 if(JSONBOX_ROOT)
 	SET(JSONBOX_INCLUDE_DIR "${JSONBOX_ROOT}/include")
@@ -43,7 +43,7 @@ find_library(JSONBOX_LIBRARY_DEBUG
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(JSONBOX DEFAULT_MSG JSONBOX_LIBRARY JSONBOX_INCLUDE_DIR)
 
-set(JSONBOX_INCLUDE_DIR "${JSONBOX_INCLUDE_DIR}")
+set(JSONBOX_INCLUDE_DIR "${JSONBOX_INCLUDE_DIR}/JsonBox/include")
 set(JSONBOX_LIBRARIES optimized "${JSONBOX_LIBRARY}" debug "${JSONBOX_LIBRARY_DEBUG}")
 
 if(NOT JSONBOX_FOUND)

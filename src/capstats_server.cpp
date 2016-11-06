@@ -11,19 +11,21 @@
 #include <sqlext.h>
 
 #include <string>
+#include <mutex>
 
 #include "include_otl.h"
 #include "JsonBox.h"
 
 #include "player_dao.h"
 
-otl_connect db; // connect object
-
-PlayerDAO playerDAO;
-
 using namespace std;
 using namespace restbed;
 using namespace JsonBox;
+
+otl_connect db; 
+mutex dbMutex;
+
+PlayerDAO playerDAO;
 
 void post_user_handler( const shared_ptr< Session > session )
 {

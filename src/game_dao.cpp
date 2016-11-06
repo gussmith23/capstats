@@ -19,7 +19,10 @@ Game GameDAO::getGame(const long long int gameId) const
 	otl_stream o((50), "select timestamp from games where rowid=:rowid<long>", db);
 	o << static_cast<long>(gameId);
 	long timestamp;
-	o >> timestamp;
+	if (!o.eof())
+		o >> timestamp;
+	else throw string("Game not found");
+
 	return Game(timestamp);
 }
 

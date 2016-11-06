@@ -27,6 +27,9 @@ Player PlayerDAO::getPlayer(const unsigned int telegramId) const
 	otl_stream o((50), "select name from players where telegram_id=:telegram_id<unsigned>", db);
 	o << telegramId;
 	string name;
-	o >> name;
+	if (!o.eof())
+		o >> name;
+	else throw string("Player not found");
+
 	return Player(telegramId, name);
 }

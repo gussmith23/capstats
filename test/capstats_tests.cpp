@@ -39,7 +39,7 @@ TEST_CASE("Player DAO") {
 		}
 	}
 
-	SECTION("Invalid player requested") {
+	SECTION("Invalid player requested throws exception") {
 		try {
 			Player out = player_dao.getPlayer(2323);
 			FAIL();
@@ -80,7 +80,7 @@ TEST_CASE("Game DAO") {
 		}
 	}
 
-	SECTION("Invalid game gotten") {
+	SECTION("Invalid game requested throws exception") {
 		try {
 			Game out = game_dao.getGame(2323);
 			FAIL();

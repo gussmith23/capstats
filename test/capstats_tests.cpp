@@ -14,86 +14,84 @@ using namespace std;
 otl_connect db;
 mutex dbMutex;
 
-TEST_CASE("Players added to and retrieved from database") {
+TEST_CASE("Player DAO") {
+	
+	if (db.connected) {
+		db.logoff();
+	}
+
 	otl_connect::otl_initialize();
 	db << "DRIVER=SQLite3 ODBC Driver;Database=:memory:;";
+
 	PlayerDAO player_dao;
 	player_dao.init();
-	try {
-		player_dao.addPlayer(Player(1, "gus"));
 
-		Player out = player_dao.getPlayer(1);
-		REQUIRE(out.getName() == "gus");
-		REQUIRE(out.getTelegramId() == 1);
-	}
-	catch (otl_exception e) {
-		cout << e.msg << endl;
-		FAIL();
-	} 
-}
-
-TEST_CASE("Invalid player requested") {
-	try {
-		if (!db.connected)
-		{
-			otl_connect::otl_initialize();
-			db << "DRIVER=SQLite3 ODBC Driver;Database=:memory:;";
+	SECTION("Players added to and retrieved from database") {
+		try {
+			player_dao.addPlayer(Player(1, "gus"));
+			Player out = player_dao.getPlayer(1);
+			REQUIRE(out.getName() == "gus");
+			REQUIRE(out.getTelegramId() == 1);
 		}
-		
-		PlayerDAO player_dao;
-		player_dao.init();
+		catch (otl_exception e) {
+			cout << e.msg << endl;
+			FAIL();
+		}
+	}
 
-		Player out = player_dao.getPlayer(2323);
-		FAIL();
-	}
-	catch (otl_exception e) {
-		cout << e.msg << endl;
-		FAIL();
-	}
-	catch (const string &e) {
-		REQUIRE(e == "Player not found");
+	SECTION("Invalid player requested") {
+		try {
+			Player out = player_dao.getPlayer(2323);
+			FAIL();
+		}
+		catch (otl_exception e) {
+			cout << e.msg << endl;
+			FAIL();
+		}
+		catch (const string &e) {
+			REQUIRE(e == "Player not found");
+		}
 	}
 }
 
-TEST_CASE("Games added to and retrieved from database") {
-	try {
-		if (!db.connected)
-		{
-			otl_connect::otl_initialize();
-			db << "DRIVER=SQLite3 ODBC Driver;Database=:memory:;";
+TEST_CASE("Game DAO") {
+
+	if (db.connected) {
+		db.logoff();
+	}
+
+	otl_connect::otl_initialize();
+	db << "DRIVER=SQLite3 ODBC Driver;Database=:memory:;";
+
+	GameDAO game_dao;
+	game_dao.init();
+
+
+	SECTION("Games added to and retrieved from database") {
+		try {
+			int id = game_dao.addGame(Game(23));
+			REQUIRE(id != 0);
+			Game out = game_dao.getGame(id);
+			REQUIRE(out.getDate() == 23);
 		}
-		GameDAO game_dao;
-		game_dao.init();
-
-		int id = game_dao.addGame(Game(23));
-		REQUIRE(id != 0);
-		Game out = game_dao.getGame(id);
-		REQUIRE(out.getDate() == 23);
-	}
-	catch (otl_exception e) {
-		cout << e.msg << endl;
-		FAIL();
-	}
-}
-
-TEST_CASE("Invalid game gotten") {
-	try {
-		if (!db.connected)
-		{
-			otl_connect::otl_initialize();
-			db << "DRIVER=SQLite3 ODBC Driver;Database=:memory:;";
+		catch (otl_exception e) {
+			cout << e.msg << endl;
+			FAIL();
 		}
-		GameDAO game_dao;
-		game_dao.init();
+	}
 
-		Game out = game_dao.getGame(2323);
-		FAIL();
+	SECTION("Invalid game gotten") {
+		try {
+			Game out = game_dao.getGame(2323);
+			FAIL();
+		}
+		catch (otl_exception e) {
+			cout << e.msg << endl;
+			FAIL();
+		}
+		catch (const string &e) {
+			REQUIRE(e == "Game not found");
+		}
 	}
-	catch (otl_exception e) {
-		cout << e.msg << endl;
-		FAIL();
-	}
-	catch (const string &e) {
-		REQUIRE(e == "Game not found");
-	}
+
 }

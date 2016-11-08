@@ -6,6 +6,7 @@
 class Player {
 public:
 	Player(long telegramId, std::string name) : telegramId(telegramId), name(name) {}
+	Player(std::string name) : telegramId(-1), name(name) {}
 
 	inline std::string getName() const { return name; }
 	inline void setName(const std::string &name) { Player::name = name; }

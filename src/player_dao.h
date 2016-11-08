@@ -8,8 +8,8 @@
 class PlayerDAO : public DAO {
 public:
 	virtual void init();
-	void addPlayer(const Player player) const;
-	Player getPlayer(const unsigned int telegramId) const;
+	long addPlayer(const Player player) const;
+	Player getPlayer(long id) const;
 };
 
 #endif

@@ -28,10 +28,10 @@ TEST_CASE("Player DAO") {
 
 	SECTION("Players added to and retrieved from database") {
 		try {
-			player_dao.addPlayer(Player(1, "gus"));
-			Player out = player_dao.getPlayer(1);
+			long id = player_dao.addPlayer(Player(23, "gus"));
+			Player out = player_dao.getPlayer(id);
 			REQUIRE(out.getName() == "gus");
-			REQUIRE(out.getTelegramId() == 1);
+			REQUIRE(out.getTelegramId() == 23);
 		}
 		catch (otl_exception e) {
 			cout << e.msg << endl;

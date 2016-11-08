@@ -34,8 +34,8 @@ int GameDAO::addGame(const Game &game) const
 		1,
 		"insert into games (timestamp) values (:timestamp<long>)",
 		db);
-	insertStream << (long) game.getDate();
-
+	insertStream << static_cast<long>(game.getDate());
+	insertStream.flush();
 	otl_stream lastRowidStream(
 		1,
 		"select last_insert_rowid()",

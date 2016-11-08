@@ -29,6 +29,9 @@ mutex dbMutex;
 
 PlayerDAO playerDAO;
 
+long addPlayerJson(Value playerJson);
+Value getPlayerJson(long id);
+
 void post_user_handler( const shared_ptr< Session > session )
 {
     const auto request = session->get_request( );
@@ -125,4 +128,27 @@ int main( const int, const char** )
     service.start( settings );
 
     return EXIT_SUCCESS;
+}
+
+// TODO: getting errors when i try to pass via constant reference.
+long addPlayerJson(Value playerJson) {
+	return playerDAO.addPlayer(Player(playerJson["telegramId"].getInteger(), playerJson["name"].getString()));
+}
+
+Value getPlayerJson(long id) {
+	Object playerJson;
+	try {
+		Player player = playerDAO.getPlayer(id);
+
+		playerJson["name"] = Value(player.getName());
+		playerJson["telegramId"] = Value((int)player.getTelegramId());
+	}
+	catch (PlayerNotFoundException) {
+		
+	}
+
+	Object out;
+	out["player"] = playerJson;
+	
+	return out;
 }

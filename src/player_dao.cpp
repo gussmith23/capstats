@@ -1,5 +1,6 @@
 #include "player_dao.h"
 #include "include_otl.h"
+#include "capstats_exceptions.h"
 #include <string>
 #include <mutex>
 
@@ -39,7 +40,7 @@ Player PlayerDAO::getPlayer(long id) const
 	string name; long telegramId;
 	if (!o.eof())
 		o >> name >> telegramId;
-	else throw string("Player not found");
+	else throw PlayerNotFoundException();
 
 	return Player(telegramId, name);
 }

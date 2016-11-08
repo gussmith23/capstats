@@ -5,6 +5,7 @@
 #include "player.h"
 #include "game_dao.h"
 #include "game.h"
+#include "capstats_exceptions.h"
 #include <iostream>
 #include <string>
 #include <mutex>
@@ -37,6 +38,9 @@ TEST_CASE("Player DAO") {
 			cout << e.msg << endl;
 			FAIL();
 		}
+		catch (...) {
+			FAIL();
+		}
 	}
 
 	SECTION("Invalid player requested throws exception") {
@@ -44,12 +48,14 @@ TEST_CASE("Player DAO") {
 			Player out = player_dao.getPlayer(2323);
 			FAIL();
 		}
+		catch (const PlayerNotFoundException &e) {
+		}
 		catch (otl_exception e) {
 			cout << e.msg << endl;
 			FAIL();
 		}
-		catch (const string &e) {
-			REQUIRE(e == "Player not found");
+		catch (...) {
+			FAIL();
 		}
 	}
 }
@@ -78,6 +84,9 @@ TEST_CASE("Game DAO") {
 			cout << e.msg << endl;
 			FAIL();
 		}
+		catch (...) {
+			FAIL();
+		}
 	}
 
 	SECTION("Invalid game requested throws exception") {
@@ -85,12 +94,14 @@ TEST_CASE("Game DAO") {
 			Game out = game_dao.getGame(2323);
 			FAIL();
 		}
+		catch (const GameNotFoundException &e) {
+		}
 		catch (otl_exception e) {
 			cout << e.msg << endl;
 			FAIL();
 		}
-		catch (const string &e) {
-			REQUIRE(e == "Game not found");
+		catch (...) {
+			FAIL();
 		}
 	}
 

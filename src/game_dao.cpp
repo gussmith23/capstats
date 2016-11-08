@@ -3,6 +3,7 @@
 #include "game_dao.h"
 #include "game.h"
 #include "include_otl.h"
+#include "capstats_exceptions.h"
 
 using namespace std;
 
@@ -21,7 +22,7 @@ Game GameDAO::getGame(const long long int gameId) const
 	long timestamp;
 	if (!o.eof())
 		o >> timestamp;
-	else throw string("Game not found");
+	else throw GameNotFoundException();
 
 	return Game(timestamp);
 }

@@ -13,7 +13,7 @@ void PlayerDAO::init() {
 	db << "create table if not exists players(name varchar(100), telegram_id int)";
 }
 
-long PlayerDAO::addPlayer(const Player player) const
+long PlayerDAO::addPlayer(const Player &player) const
 {
 	lock_guard<mutex> lock(dbMutex);
 

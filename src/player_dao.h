@@ -8,7 +8,7 @@
 class PlayerDAO : public DAO {
 public:
 	virtual void init();
-	long addPlayer(const Player player) const;
+	long addPlayer(const Player &player) const;
 	Player getPlayer(long id) const;
 };
 

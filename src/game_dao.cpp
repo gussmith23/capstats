@@ -15,10 +15,10 @@ void GameDAO::init()
 	db << "create table if not exists games (timestamp int)";
 }
 
-Game GameDAO::getGame(const long long int gameId) const 
+Game GameDAO::getGame(long gameId) const 
 {
 	otl_stream o((50), "select timestamp from games where rowid=:rowid<long>", db);
-	o << static_cast<long>(gameId);
+	o << gameId;
 	long timestamp;
 	if (!o.eof())
 		o >> timestamp;
@@ -27,7 +27,7 @@ Game GameDAO::getGame(const long long int gameId) const
 	return Game(timestamp);
 }
 
-int GameDAO::addGame(const Game &game) const
+long GameDAO::addGame(const Game &game) const
 {
 	lock_guard<mutex> guard(dbMutex);
 

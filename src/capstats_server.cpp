@@ -55,12 +55,11 @@ void post_user_handler( const shared_ptr< Session > session )
 
 void get_user_handler(const shared_ptr<Session> session)
 {
-	const auto request = session->get_request();
-
-	const unsigned int telegramId = stoi(request->get_query_parameter("telegramId"));
-
     try
     {
+        const auto request = session->get_request();
+        const unsigned int telegramId = stoi(request->get_query_parameter("telegramId", "0"));
+
         Player player = playerDAO.getPlayer(telegramId);
 
         Object playerJson;
@@ -80,6 +79,23 @@ void get_user_handler(const shared_ptr<Session> session)
     {
         string body(e.what());
         session->close(NOT_FOUND, body, { {"Content-Length", to_string(body.size())}, {"Content-type", "text/html"}});
+    }
+    catch (const otl_exception& e)
+    {
+        cerr << e.msg << endl;
+        cerr << e.stm_text << endl;
+        cerr << e.var_info << endl;
+    }
+    catch (const exception& e)
+    {
+        string body;
+        body = "Unexpected exception: \"";
+        body += e.what();
+        body += "\"";
+
+        cerr << body << endl;
+
+        session->close(INTERNAL_SERVER_ERROR, body, { {"Content-Length", to_string(body.size())}, {"Content-type", "text/html"} });
     }
 }
 

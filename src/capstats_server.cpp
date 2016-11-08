@@ -18,11 +18,13 @@
 
 #include "player_dao.h"
 
+#include "capstats_exceptions.h"
+
 using namespace std;
 using namespace restbed;
 using namespace JsonBox;
 
-otl_connect db; 
+otl_connect db;
 mutex dbMutex;
 
 PlayerDAO playerDAO;
@@ -42,7 +44,7 @@ void post_user_handler( const shared_ptr< Session > session )
 		player.loadFromString(string(body.begin(), body.end()));
 
 		playerDAO.addPlayer(Player(player["telegramId"].getInteger(), player["name"].getString()));
-		
+
 		session->close(OK, "", { { "Content-Length", "0" },{ "Content-Type", "application/json" } });
 
 	} );
@@ -51,23 +53,31 @@ void post_user_handler( const shared_ptr< Session > session )
 void get_user_handler(const shared_ptr<Session> session)
 {
 	const auto request = session->get_request();
-	
+
 	const unsigned int telegramId = stoi(request->get_query_parameter("telegramId"));
 
-	Player player = playerDAO.getPlayer(telegramId);
+    try
+    {
+        Player player = playerDAO.getPlayer(telegramId);
 
-	Object playerJson;
-	playerJson["name"] = Value(player.getName());
-	playerJson["telegramId"] = Value((int)player.getTelegramId());
+        Object playerJson;
+        playerJson["name"] = Value(player.getName());
+        playerJson["telegramId"] = Value((int)player.getTelegramId());
 
-	Object out;
-	out["player"] = playerJson;
+        Object out;
+        out["player"] = playerJson;
 
-	stringstream stream;
-	Value(out).writeToStream(stream);
-	string response_body = stream.str();
+        stringstream stream;
+        Value(out).writeToStream(stream);
+        string response_body = stream.str();
 
-	session->close(OK, response_body, { { "Content-Length", to_string(response_body.length()) },{ "Content-Type", "application/json" } });
+        session->close(OK, response_body, { { "Content-Length", to_string(response_body.length()) },{ "Content-Type", "application/json" } });
+    }
+    catch (const PlayerNotFoundException& e)
+    {
+        string body(e.what());
+        session->close(NOT_FOUND, body, { {"Content-Length", to_string(body.size())}, {"Content-type", "text/html"}});
+    }
 }
 
 void get_user_html(const shared_ptr<Session> session)
@@ -89,7 +99,7 @@ int main( const int, const char** )
 	otl_connect::otl_initialize();
 	try {
 
-		db << "DRIVER=SQLite3 ODBC Driver;Database=test.db;"; 
+		db << "DRIVER=SQLite3 ODBC Driver;Database=test.db;";
 		playerDAO.init();
 	}
 
@@ -98,7 +108,7 @@ int main( const int, const char** )
 		cerr << p.stm_text << endl; // print out SQL that caused the error
 		cerr << p.var_info << endl; // print out the variable that caused the error
 	}
-	
+
 	auto user = make_shared<Resource>();
 	user->set_path("/player");
 	user->set_method_handler("GET", get_user_handler);

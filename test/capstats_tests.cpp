@@ -48,7 +48,7 @@ TEST_CASE("Player DAO") {
 			Player out = player_dao.getPlayer(2323);
 			FAIL();
 		}
-		catch (const PlayerNotFoundException &e) {
+		catch (PlayerNotFoundException) {
 		}
 		catch (otl_exception e) {
 			cout << e.msg << endl;
@@ -94,7 +94,7 @@ TEST_CASE("Game DAO") {
 			Game out = game_dao.getGame(2323);
 			FAIL();
 		}
-		catch (const GameNotFoundException &e) {
+		catch (GameNotFoundException) {
 		}
 		catch (otl_exception e) {
 			cout << e.msg << endl;

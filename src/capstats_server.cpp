@@ -17,6 +17,7 @@
 #include "JsonBox.h"
 
 #include "player_dao.h"
+#include "team_dao.h"
 
 #include "capstats_exceptions.h"
 
@@ -28,6 +29,7 @@ otl_connect db;
 mutex dbMutex;
 
 PlayerDAO playerDAO;
+TeamDAO teamDAO;
 
 long addPlayerJson(Value playerJson);
 Value getPlayerJson(long id);
@@ -46,7 +48,10 @@ void post_user_handler( const shared_ptr< Session > session )
 		Value player;
 		player.loadFromString(string(body.begin(), body.end()));
 
-		playerDAO.addPlayer(Player(player["telegramId"].getInteger(), player["name"].getString()));
+		Player out;
+		out.setName(player["name"].getString());
+		out.setTelegramId(player["telegramId"].getInteger());
+		playerDAO.addPlayer(out);
 
 		session->close(OK, "", { { "Content-Length", "0" },{ "Content-Type", "application/json" } });
 
@@ -120,6 +125,7 @@ int main( const int, const char** )
 
 		db << "DRIVER=SQLite3 ODBC Driver;Database=test.db;";
 		playerDAO.init();
+		teamDAO.init();
 	}
 
 	catch (otl_exception& p) { // intercept OTL exceptions
@@ -147,8 +153,12 @@ int main( const int, const char** )
 }
 
 // TODO: getting errors when i try to pass via constant reference.
-long addPlayerJson(Value playerJson) {
-	return playerDAO.addPlayer(Player(playerJson["telegramId"].getInteger(), playerJson["name"].getString()));
+long addPlayerJson(Object playerJson) {
+	Player out;
+	if (playerJson.count("name")) out.setName(playerJson["name"].tryGetString(""));
+	if (playerJson.count("telegramId")) out.setTelegramId(playerJson["telegramId"].tryGetInteger(-1));
+
+	return playerDAO.addPlayer(out);
 }
 
 Value getPlayerJson(long id) {

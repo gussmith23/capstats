@@ -29,7 +29,10 @@ TEST_CASE("Player DAO") {
 
 	SECTION("Players added to and retrieved from database") {
 		try {
-			long id = player_dao.addPlayer(Player(23, "gus"));
+			Player in;
+			in.setTelegramId(23);
+			in.setName("gus");
+			long id = player_dao.addPlayer(in);
 			Player out = player_dao.getPlayer(id);
 			REQUIRE(out.getName() == "gus");
 			REQUIRE(out.getTelegramId() == 23);

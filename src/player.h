@@ -5,8 +5,7 @@
 
 class Player {
 public:
-	Player(long telegramId, std::string name) : telegramId(telegramId), name(name) {}
-	Player(std::string name) : telegramId(-1), name(name) {}
+	Player() : id(-1), telegramId(-1), name("") {};
 
 	inline std::string getName() const { return name; }
 	inline void setName(const std::string &name) { Player::name = name; }
@@ -14,9 +13,12 @@ public:
 	inline long getTelegramId() const { return telegramId; }
 	inline void setTelegramId(long telegramId) { Player::telegramId = telegramId; }
 
+	inline long getId() const { return id; }
+	inline void setId(long id) { Player::id = id; }
 private:
 	std::string name;
 	long telegramId;
+	long id;
 };
 
 #endif

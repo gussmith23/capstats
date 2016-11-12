@@ -42,5 +42,9 @@ Player PlayerDAO::getPlayer(long id) const
 		o >> name >> telegramId;
 	else throw PlayerNotFoundException();
 
-	return Player(telegramId, name);
+	Player out;
+	out.setName(name);
+	out.setTelegramId(telegramId);
+
+	return out;
 }

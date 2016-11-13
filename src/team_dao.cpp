@@ -25,3 +25,25 @@ void TeamDAO::init() {
 		"foreign key(game_id) references games(rowid),"
 		"foreign key(player_id) references players(rowid))";
 }
+
+int TeamDAO::addTeams(long gameid, std::multimap<int, long> teams)
+{
+	try {
+		otl_stream o(50,
+			"insert into playergame (game_id, player_id, team) values (:game_id<long>, :player_id<long>, :team<int>)",
+			db);
+
+		for (auto it = teams.begin(); it != teams.end(); ++it)
+		{
+			o << gameid << it->second << it->first;
+		}
+
+		o.flush();
+
+		return 0;
+	} 
+	catch (otl_exception)
+	{
+		return 1;
+	}
+}

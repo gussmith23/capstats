@@ -4,46 +4,52 @@
 #include "game.h"
 #include "include_otl.h"
 #include "capstats_exceptions.h"
+#include "team_dao.h"
 
 using namespace std;
 
-extern otl_connect db;
-extern mutex dbMutex;
-
 void GameDAO::init() 
 {
-	db << "create table if not exists games (timestamp int)";
+	*db << "create table if not exists games (timestamp int)";
 }
 
 Game GameDAO::getGame(long gameId) const 
 {
-	otl_stream o((50), "select timestamp from games where rowid=:rowid<long>", db);
+	otl_stream o(50, 
+		"select timestamp from games where rowid=:rowid<long>", 
+		*db);
 	o << gameId;
 	long timestamp;
 	if (!o.eof())
 		o >> timestamp;
-	else throw GameNotFoundException();
+	else return Game(-1);
 
-	return Game(timestamp);
+	Game out; 
+	out.setId(gameId);
+	out.setTime(timestamp);
+
+	return out;
 }
 
-long GameDAO::addGame(const Game &game) const
+bool GameDAO::addGame(Game &game) const
 {
-	lock_guard<mutex> guard(dbMutex);
+	if (teamDAO->addTeams(game.getId(), game.getTeams()) == false) return false;
 
 	otl_stream insertStream(
 		1,
 		"insert into games (timestamp) values (:timestamp<long>)",
-		db);
-	insertStream << static_cast<long>(game.getDate());
+		*db);
+	insertStream << static_cast<long>(game.getTime());
 	insertStream.flush();
 	otl_stream lastRowidStream(
 		1,
 		"select last_insert_rowid()",
-		db);
+		*db);
 	lastRowidStream.flush();
 	string rowid;
 	lastRowidStream >> rowid;
 
-	return stol(rowid);
+	game.setId(stol(rowid));
+
+	return true;
 }

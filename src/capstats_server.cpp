@@ -12,8 +12,8 @@
 
 #include <string>
 #include <mutex>
+#include <functional>
 
-#include "include_otl.h"
 #include "JsonBox.h"
 
 #include "player_dao.h"
@@ -21,26 +21,19 @@
 
 #include "capstats_exceptions.h"
 
+#include "capstats_server.h"
+
 using namespace std;
 using namespace restbed;
 using namespace JsonBox;
 
-otl_connect db;
-mutex dbMutex;
-
-PlayerDAO playerDAO;
-TeamDAO teamDAO;
-
-long addPlayerJson(Value playerJson);
-Value getPlayerJson(long id);
-
-void post_user_handler( const shared_ptr< Session > session )
+void CapstatsServer::post_user_handler( const shared_ptr< Session > session )
 {
     const auto request = session->get_request( );
 
     int content_length = stoi(request->get_header( "Content-Length", "0"));
 
-    session->fetch( content_length, [ ]( const shared_ptr< Session > session, const Bytes & body )
+    session->fetch( content_length, [this]( const shared_ptr< Session > session, const Bytes & body )
     {
         fprintf( stdout, "%.*s\n", ( int ) body.size( ), body.data( ) );
         session->close( OK, "Hello, World!", { { "Content-Length", "13" } } );
@@ -51,21 +44,21 @@ void post_user_handler( const shared_ptr< Session > session )
 		Player out;
 		out.setName(player["name"].getString());
 		out.setTelegramId(player["telegramId"].getInteger());
-		playerDAO.addPlayer(out);
+		playerDAO->addPlayer(out);
 
 		session->close(OK, "", { { "Content-Length", "0" },{ "Content-Type", "application/json" } });
 
 	} );
 }
 
-void get_user_handler(const shared_ptr<Session> session)
+void CapstatsServer::get_user_handler(const shared_ptr<Session> session)
 {
     try
     {
         const auto request = session->get_request();
         const unsigned int telegramId = stoi(request->get_query_parameter("telegramId", "0"));
 
-        Player player = playerDAO.getPlayer(telegramId);
+        Player player = playerDAO->getPlayer(telegramId);
 
         Object playerJson;
         playerJson["name"] = Value(player.getName());
@@ -104,12 +97,12 @@ void get_user_handler(const shared_ptr<Session> session)
     }
 }
 
-void get_user_html(const shared_ptr<Session> session)
+void CapstatsServer::get_user_html(const shared_ptr<Session> session)
 {
 	const auto request = session->get_request();
 	const unsigned int telegramId = stoi(request->get_query_parameter("telegramId"));
 
-	Player player = playerDAO.getPlayer(telegramId);
+	Player player = playerDAO->getPlayer(telegramId);
 
 	string out_html = "<h1>" + player.getName() + "</h1><p><b>Telegram ID:</b>"  + to_string(player.getTelegramId()) + "</p>";
 
@@ -117,15 +110,17 @@ void get_user_html(const shared_ptr<Session> session)
 	session->close(OK, out_html, { { "Content-Length", to_string(out_html.length()) },{ "Content-Type", "text/html" } });
 }
 
-int main( const int, const char** )
-{
+
+
+void CapstatsServer::init() {
+
 	// Setup db.
 	otl_connect::otl_initialize();
 	try {
-
-		db << "DRIVER=SQLite3 ODBC Driver;Database=test.db;";
-		playerDAO.init();
-		teamDAO.init();
+		*db << "DRIVER=SQLite3 ODBC Driver;Database=test.db;";
+		playerDAO->init();
+		gameDAO->init();
+		teamDAO->init();
 	}
 
 	catch (otl_exception& p) { // intercept OTL exceptions
@@ -133,17 +128,20 @@ int main( const int, const char** )
 		cerr << p.stm_text << endl; // print out SQL that caused the error
 		cerr << p.var_info << endl; // print out the variable that caused the error
 	}
+}
+
+int CapstatsServer::run() {
+
 
 	auto user = make_shared<Resource>();
 	user->set_path("/player");
-	user->set_method_handler("GET", get_user_handler);
-	user->set_method_handler("POST", post_user_handler);
+	user->set_method_handler(string("GET"), bind1st(mem_fun(&CapstatsServer::get_user_handler), this));
+	user->set_method_handler("POST", bind1st(mem_fun(&CapstatsServer::post_user_handler), this));
 	//user->set_method_handler("GET", { {"Accept","text/html"} }, get_user_html);
 
-
-    auto settings = make_shared< Settings >( );
-    settings->set_port( 23232 );
-    settings->set_default_header( "Connection", "close" );
+    auto settings = make_shared< Settings >();
+    settings->set_port(port);
+    settings->set_default_header("Connection", "close");
 
     Service service;
 	service.publish(user);
@@ -153,18 +151,18 @@ int main( const int, const char** )
 }
 
 // TODO: getting errors when i try to pass via constant reference.
-long addPlayerJson(Object playerJson) {
+bool CapstatsServer::addPlayerJson(Object playerJson) {
 	Player out;
 	if (playerJson.count("name")) out.setName(playerJson["name"].tryGetString(""));
 	if (playerJson.count("telegramId")) out.setTelegramId(playerJson["telegramId"].tryGetInteger(-1));
 
-	return playerDAO.addPlayer(out);
+	return playerDAO->addPlayer(out);
 }
 
-Value getPlayerJson(long id) {
+Value CapstatsServer::getPlayerJson(long id) {
 	Object playerJson;
 	try {
-		Player player = playerDAO.getPlayer(id);
+		Player player = playerDAO->getPlayer(id);
 
 		playerJson["name"] = Value(player.getName());
 		playerJson["telegramId"] = Value((int)player.getTelegramId());

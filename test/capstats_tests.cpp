@@ -5,6 +5,7 @@
 #include "player.h"
 #include "game_dao.h"
 #include "game.h"
+#include "team_dao.h"
 #include "capstats_exceptions.h"
 #include <iostream>
 #include <string>
@@ -32,8 +33,13 @@ TEST_CASE("Player DAO") {
 			Player in;
 			in.setTelegramId(23);
 			in.setName("gus");
-			long id = player_dao.addPlayer(in);
-			Player out = player_dao.getPlayer(id);
+
+			long idBeforeAdd = in.getId();
+
+			REQUIRE(player_dao.addPlayer(in) == true);
+			REQUIRE(in.getId() != idBeforeAdd);
+
+			Player out = player_dao.getPlayer(in.getId());
 			REQUIRE(out.getName() == "gus");
 			REQUIRE(out.getTelegramId() == 23);
 		}
@@ -46,12 +52,10 @@ TEST_CASE("Player DAO") {
 		}
 	}
 
-	SECTION("Invalid player requested throws exception") {
+	SECTION("Invalid player requested returns error code") {
 		try {
 			Player out = player_dao.getPlayer(2323);
-			FAIL();
-		}
-		catch (PlayerNotFoundException) {
+			REQUIRE(out.getId() == -1);
 		}
 		catch (otl_exception e) {
 			cout << e.msg << endl;
@@ -75,13 +79,21 @@ TEST_CASE("Game DAO") {
 	GameDAO game_dao;
 	game_dao.init();
 
+	TeamDAO teamDAO;
+	teamDAO.init();
+
 
 	SECTION("Games added to and retrieved from database") {
 		try {
-			int id = game_dao.addGame(Game(23));
-			REQUIRE(id != 0);
-			Game out = game_dao.getGame(id);
-			REQUIRE(out.getDate() == 23);
+			Game g; 
+			g.setTime(23);
+			long idBeforeAdd = g.getId();
+
+			REQUIRE(game_dao.addGame(g) == true);
+			REQUIRE(g.getId() != idBeforeAdd);
+
+			Game out = game_dao.getGame(g.getId());
+			REQUIRE(out.getTime() == 23);
 		}
 		catch (otl_exception e) {
 			cout << e.msg << endl;
@@ -92,12 +104,10 @@ TEST_CASE("Game DAO") {
 		}
 	}
 
-	SECTION("Invalid game requested throws exception") {
+	SECTION("Invalid game requested returns error code") {
 		try {
 			Game out = game_dao.getGame(2323);
-			FAIL();
-		}
-		catch (GameNotFoundException) {
+			REQUIRE(out.getId() == -1);
 		}
 		catch (otl_exception e) {
 			cout << e.msg << endl;
@@ -109,3 +119,4 @@ TEST_CASE("Game DAO") {
 	}
 
 }
+

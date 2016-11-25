@@ -6,41 +6,40 @@
 
 using namespace std;
 
-extern otl_connect db;
-extern mutex dbMutex;
-
 void PlayerDAO::init() {
-	db << "create table if not exists players(name varchar(100), telegram_id int)";
+	*db << "create table if not exists players(name varchar(100), telegram_id int)";
 }
 
-long PlayerDAO::addPlayer(const Player &player) const
+bool PlayerDAO::addPlayer(Player &player) const
 {
-	lock_guard<mutex> lock(dbMutex);
-
 	otl_stream o(1,
 		"insert into players (name, telegram_id) values (:name<char[100]>, :telegram_id<long>)",
-		db);
+		*db);
 	o << player.getName() << player.getTelegramId();
 	o.flush();
 	otl_stream lastRowidStream(
 		1,
 		"select last_insert_rowid()",
-		db);
+		*db);
 	lastRowidStream.flush();
 	string rowid;
 	lastRowidStream >> rowid;
 	
-	return stol(rowid);
+	player.setId(stol(rowid));
+
+	return true;
 }
 
 Player PlayerDAO::getPlayer(long id) const
 {
-	otl_stream o((50), "select name, telegram_id from players where rowid=:id<long>", db);
+	otl_stream o(50, 
+		"select name, telegram_id from players where rowid=:id<long>", 
+		*db);
 	o << id;
 	string name; long telegramId;
 	if (!o.eof())
 		o >> name >> telegramId;
-	else throw PlayerNotFoundException();
+	else return Player(-1);
 
 	Player out;
 	out.setName(name);

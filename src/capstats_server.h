@@ -8,10 +8,12 @@
 #include <restbed>
 #include "include_otl.h"
 #include <memory>
+#include <string>
 
 class CapstatsServer {
 public:
-	CapstatsServer(uint16_t port) :
+	CapstatsServer(uint16_t port, std::string databasePath) :
+		databasePath(databasePath),
 		port(port),
 		db(std::shared_ptr<otl_connect>(new otl_connect)),
 		teamDAO(std::shared_ptr<TeamDAO>(new TeamDAO(db))),
@@ -26,6 +28,7 @@ public:
 	void get_user_html(const std::shared_ptr<restbed::Session> session);
 private:
 	uint16_t port;
+	std::string databasePath;
 
 	std::shared_ptr<otl_connect> db;
 	

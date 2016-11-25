@@ -117,7 +117,8 @@ void CapstatsServer::init() {
 	// Setup db.
 	otl_connect::otl_initialize();
 	try {
-		*db << "DRIVER=SQLite3 ODBC Driver;Database=test.db;";
+		string connectionString = "DRIVER=SQLite3 ODBC Driver;Database=" + databasePath + ";";
+		*db << connectionString.c_str();
 		playerDAO->init();
 		gameDAO->init();
 		teamDAO->init();

@@ -10,22 +10,16 @@
 #include <iostream>
 #include <string>
 #include <mutex>
+#include <memory>
 
 using namespace std;
 
-otl_connect db;
-mutex dbMutex;
-
 TEST_CASE("Player DAO") {
-	
-	if (db.connected) {
-		db.logoff();
-	}
-
 	otl_connect::otl_initialize();
-	db << "DRIVER=SQLite3 ODBC Driver;Database=:memory:;";
+	shared_ptr<otl_connect> db = shared_ptr<otl_connect>(new otl_connect);
+	*db << "DRIVER=SQLite3 ODBC Driver;Database=:memory:;";
 
-	PlayerDAO player_dao;
+	PlayerDAO player_dao(db);
 	player_dao.init();
 
 	SECTION("Players added to and retrieved from database") {
@@ -68,20 +62,14 @@ TEST_CASE("Player DAO") {
 }
 
 TEST_CASE("Game DAO") {
-
-	if (db.connected) {
-		db.logoff();
-	}
-
 	otl_connect::otl_initialize();
-	db << "DRIVER=SQLite3 ODBC Driver;Database=:memory:;";
+	shared_ptr<otl_connect> db(new otl_connect);
+	*db << "DRIVER=SQLite3 ODBC Driver;Database=:memory:;";
 
-	GameDAO game_dao;
-	game_dao.init();
-
-	TeamDAO teamDAO;
-	teamDAO.init();
-
+	shared_ptr<TeamDAO> teamDAO(new TeamDAO(db));
+	teamDAO->init();
+	shared_ptr<GameDAO> gameDAO(new GameDAO(db, teamDAO));
+	gameDAO->init();
 
 	SECTION("Games added to and retrieved from database") {
 		try {
@@ -89,10 +77,10 @@ TEST_CASE("Game DAO") {
 			g.setTime(23);
 			long idBeforeAdd = g.getId();
 
-			REQUIRE(game_dao.addGame(g) == true);
+			REQUIRE(gameDAO->addGame(g) == true);
 			REQUIRE(g.getId() != idBeforeAdd);
 
-			Game out = game_dao.getGame(g.getId());
+			Game out = gameDAO->getGame(g.getId());
 			REQUIRE(out.getTime() == 23);
 		}
 		catch (otl_exception e) {
@@ -103,10 +91,9 @@ TEST_CASE("Game DAO") {
 			FAIL();
 		}
 	}
-
 	SECTION("Invalid game requested returns error code") {
 		try {
-			Game out = game_dao.getGame(2323);
+			Game out = gameDAO->getGame(2323);
 			REQUIRE(out.getId() == -1);
 		}
 		catch (otl_exception e) {

@@ -16,10 +16,7 @@ public:
 		db(std::shared_ptr<otl_connect>(new otl_connect)),
 		teamDAO(std::shared_ptr<TeamDAO>(new TeamDAO(db))),
 		playerDAO(std::shared_ptr<PlayerDAO>(new PlayerDAO(db))),
-		//playerDAO(PlayerDAO(dbPtr)),
-		//teamDAO(TeamDAO(dbPtr)),
 		gameDAO(std::shared_ptr<GameDAO>(new GameDAO(db, teamDAO))) {};
-		//gameDAO(GameDAO(dbPtr, teamDAOPtr)) {}
 
 	void init();
 	int run();

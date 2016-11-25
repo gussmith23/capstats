@@ -11,6 +11,7 @@
 #include <string>
 #include <mutex>
 #include <memory>
+#include <map>
 
 using namespace std;
 
@@ -107,3 +108,20 @@ TEST_CASE("Game DAO") {
 
 }
 
+TEST_CASE("Team DAO")
+{
+	otl_connect::otl_initialize();
+	shared_ptr<otl_connect> db(new otl_connect);
+	*db << "DRIVER=SQLite3 ODBC Driver;Database=:memory:;";
+
+	shared_ptr<TeamDAO> teamDAO(new TeamDAO(db));
+	teamDAO->init();
+
+	SECTION("Add and get team.")
+	{
+		multimap<int, long> in = { {1,2}, {1, 23}, {0, 69}, {0, 420}, {4, 10} };
+		teamDAO->addTeams(1, in);
+		multimap<int, long> out = teamDAO->getTeams(1);
+		REQUIRE(in == out);
+	}
+}

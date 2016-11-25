@@ -23,7 +23,7 @@ void TeamDAO::init() {
 		"foreign key(player_id) references players(rowid))";
 }
 
-bool TeamDAO::addTeams(long gameid, std::multimap<int, long> teams)
+bool TeamDAO::addTeams(long gameid, multimap<int, long> teams)
 {
 	try {
 		otl_stream o(50,
@@ -42,5 +42,28 @@ bool TeamDAO::addTeams(long gameid, std::multimap<int, long> teams)
 	catch (otl_exception)
 	{
 		return false;
+	}
+}
+
+multimap<int, long> TeamDAO::getTeams(long gameid)
+{
+	try {
+		multimap<int, long> out;
+		otl_stream select(50,
+			"select player_id, team from playergame where game_id=:game_id<long>",
+			*db);
+		select << gameid;
+		select.flush();
+		long playerId; int teamId;
+		while (!select.eof())
+		{
+			select >> playerId >> teamId;
+			out.insert(pair<int, long>(teamId,playerId));
+		}
+		return out;
+	}
+	catch (otl_exception)
+	{
+		return multimap<int, long>();
 	}
 }

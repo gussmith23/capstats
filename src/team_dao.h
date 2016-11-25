@@ -22,6 +22,16 @@ public:
 	 * \return true for success, false for failure
 	 */
 	bool addTeams(long gameid, std::multimap<int,long> teams);
+	
+	/**
+	 * Gets the teams frpm a single game in the database.
+	 * \param gameid the id of the game.
+	 * \return a multimap which maps a team index in the game to a player on that team.
+	 *		for example, some mappings might be 0 -> 1, 1 -> 3
+	 *		for a 1v1 game between player 1 and player 3.
+	 *		If no teams were found, the multimap will be empty.
+	 */
+	std::multimap<int, long> getTeams(long gameid);
 };
 
 #endif // !TEAM_DAO_H

@@ -1,5 +1,5 @@
 #include <ctime>
-#include <mutex>
+#include <map>
 #include "game_dao.h"
 #include "game.h"
 #include "include_otl.h"
@@ -24,17 +24,18 @@ Game GameDAO::getGame(long gameId) const
 		o >> timestamp;
 	else return Game(-1);
 
+	multimap<int, long> teams = teamDAO->getTeams(gameId);
+
 	Game out; 
 	out.setId(gameId);
 	out.setTime(timestamp);
+	out.setTeams(teams);
 
 	return out;
 }
 
 bool GameDAO::addGame(Game &game) const
 {
-	if (teamDAO->addTeams(game.getId(), game.getTeams()) == false) return false;
-
 	otl_stream insertStream(
 		1,
 		"insert into games (timestamp) values (:timestamp<long>)",
@@ -50,6 +51,9 @@ bool GameDAO::addGame(Game &game) const
 	lastRowidStream >> rowid;
 
 	game.setId(stol(rowid));
+
+	// Now that we've got the gameid, add the teams...
+	if (teamDAO->addTeams(game.getId(), game.getTeams()) == false) return false;
 
 	return true;
 }

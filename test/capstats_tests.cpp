@@ -77,12 +77,15 @@ TEST_CASE("Game DAO") {
 			Game g; 
 			g.setTime(23);
 			long idBeforeAdd = g.getId();
+			multimap<int, long> teams = { {1,2}, {3,4}, {3,5}, {6,7} };
+			g.setTeams(teams);
 
 			REQUIRE(gameDAO->addGame(g) == true);
 			REQUIRE(g.getId() != idBeforeAdd);
 
 			Game out = gameDAO->getGame(g.getId());
 			REQUIRE(out.getTime() == 23);
+			REQUIRE(out.getTeams() == teams);
 		}
 		catch (otl_exception e) {
 			cout << e.msg << endl;

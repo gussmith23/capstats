@@ -16,10 +16,15 @@ public:
 
 	inline long getId() const { return id; }
 	inline void setId(long id) { Player::id = id; }
+
+	inline std::string getTelegramUsername() const { return telegramUsername; }
+	inline void setTelegramUsername(const std::string &telegramUsername) { Player::telegramUsername = telegramUsername; }
+
 private:
 	std::string name;
 	long telegramId;
 	long id;
+	std::string telegramUsername;
 };
 
 #endif

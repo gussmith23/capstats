@@ -28,6 +28,7 @@ TEST_CASE("Player DAO") {
 			Player in;
 			in.setTelegramId(23);
 			in.setName("gus");
+			in.setTelegramUsername("testUsername");
 
 			long idBeforeAdd = in.getId();
 
@@ -37,6 +38,7 @@ TEST_CASE("Player DAO") {
 			Player out = player_dao.getPlayer(in.getId());
 			REQUIRE(out.getName() == "gus");
 			REQUIRE(out.getTelegramId() == 23);
+			REQUIRE(out.getTelegramUsername() == "testUsername");
 		}
 		catch (otl_exception e) {
 			cout << e.msg << endl;

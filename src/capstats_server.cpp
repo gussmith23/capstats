@@ -13,6 +13,8 @@
 #include <string>
 #include <mutex>
 #include <functional>
+#include <map>
+#include <sstream>
 
 #include "JsonBox.h"
 
@@ -140,12 +142,17 @@ int CapstatsServer::run() {
 	user->set_method_handler("POST", bind1st(mem_fun(&CapstatsServer::post_user_handler), this));
 	//user->set_method_handler("GET", { {"Accept","text/html"} }, get_user_html);
 
+	auto game = make_shared<Resource>();
+	game->set_path("/game");
+	game->set_method_handler("POST", { {"Content-Type", "application/json"} }, bind1st(mem_fun(&CapstatsServer::game_post_json), this));
+
     auto settings = make_shared< Settings >();
     settings->set_port(port);
     settings->set_default_header("Connection", "close");
 
     Service service;
 	service.publish(user);
+	service.publish(game);
     service.start( settings );
 
     return EXIT_SUCCESS;
@@ -176,4 +183,49 @@ Value CapstatsServer::getPlayerJson(long id) {
 	out["player"] = playerJson;
 	
 	return out;
+}
+
+void CapstatsServer::game_post_json(const std::shared_ptr<restbed::Session> session)
+{
+	const auto request = session->get_request();
+
+	int content_length = stoi(request->get_header("Content-Length", "0"));
+
+	session->fetch(content_length, [this](const shared_ptr< Session > session, const Bytes & body)
+	{
+		Value game;
+		game.loadFromString(string(body.begin(), body.end()));
+		
+		multimap<int, long> teams;
+		for (const auto& x : game["teams"].getObject())
+		{
+			int team = stoi(x.first);
+			for (const auto& playerId : x.second.getArray())
+				teams.insert(pair<int, long>(team, playerId.getInteger()));
+		}
+
+		map<int, int> scores;
+		for (const auto& scorePair : game["score"].getObject())
+		{
+			int team = stoi(scorePair.first);
+			scores.insert(pair<int, int>(team, scorePair.second.getInteger()));
+		}
+
+		time_t time = game["time"].getInteger();
+
+		Game out;
+		out.setTeams(teams);
+		out.setTime(time);
+
+		gameDAO->addGame(out);
+
+		game["id"] = out.getId();
+
+		stringstream ss;
+		game.writeToStream(ss);
+		string jsonString = ss.str();
+		session->close(OK, jsonString, { { "Content-Length", to_string(jsonString.length()) },{ "Content-Type", "application/json" } });
+
+	});
+
 }

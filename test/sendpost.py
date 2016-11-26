@@ -1,10 +1,7 @@
-from urllib.parse import urlencode
-from urllib.request import Request, urlopen
+import requests
 
-url = 'http://localhost:23232/resource' # Set destination URL here
-post_fields = {'foo': 'bar',
-               'Content-Length' : 1}     # Set POST fields here
+url = 'http://localhost:23232/game' # Set destination URL here
 
-request = Request(url, urlencode(post_fields).encode())
-json = urlopen(request).read().decode()
-print(json)
+post_params = {'teams': { 1 : [1,2,3], 2: [4,5,6] } }
+r = requests.post(url, json = post_params)
+

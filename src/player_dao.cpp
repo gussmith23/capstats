@@ -57,3 +57,23 @@ Player PlayerDAO::getPlayer(long id) const
 
 	return out;
 }
+
+Player PlayerDAO::findPlayerByTelegramUsername(const string& telegramUsername)
+{
+	otl_stream o(50,
+		"select name, telegram_id, rowid from players where telegram_username=:telegram_username<char[100]>",
+		*db);
+	o << telegramUsername;
+	string name; long telegramId; long id;
+	if (!o.eof())
+		o >> name >> telegramId >> id;
+	else return Player(-1);
+
+	Player out;
+	out.setId(id);
+	out.setName(name);
+	out.setTelegramId(telegramId);
+	out.setTelegramUsername(telegramUsername);
+
+	return out;
+}

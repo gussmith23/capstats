@@ -62,6 +62,34 @@ TEST_CASE("Player DAO") {
 			FAIL();
 		}
 	}
+
+	SECTION("Find player by username - player exists") {
+		try
+		{
+			Player in;
+			in.setTelegramUsername("testUsername");
+			player_dao.addPlayer(in);
+			Player out = player_dao.findPlayerByTelegramUsername("testUsername");
+			REQUIRE(out.getTelegramUsername() == "testUsername");
+			REQUIRE(out.getId() >= 0);
+		}
+		catch (...)
+		{
+			FAIL();
+		}
+	}
+
+	SECTION("Find player by username - player does not exist") {
+		try
+		{
+			Player out = player_dao.findPlayerByTelegramUsername("testUsername");
+			REQUIRE(out.getId() == -1);
+		}
+		catch (...)
+		{
+			FAIL();
+		}
+	}
 }
 
 TEST_CASE("Game DAO") {

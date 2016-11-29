@@ -37,19 +37,38 @@ void CapstatsServer::player_post_json( const shared_ptr< Session > session )
 
     session->fetch( content_length, [this]( const shared_ptr< Session > session, const Bytes & body )
     {
-        fprintf( stdout, "%.*s\n", ( int ) body.size( ), body.data( ) );
-        session->close( OK, "Hello, World!", { { "Content-Length", "13" } } );
+		try {
+			Value player;
+			player.loadFromString(string(body.begin(), body.end()));
 
-		Value player;
-		player.loadFromString(string(body.begin(), body.end()));
+			Player in = jsonToPlayer(player);
+			if (!playerDAO->addPlayer(in)) {
+				session->close(INTERNAL_SERVER_ERROR);
+				return;
+			}
 
-		Player out;
-		out.setName(player["name"].getString());
-		out.setTelegramId(player["telegramId"].getInteger());
-		playerDAO->addPlayer(out);
+			Value out = playerToJson(in);
 
-		session->close(OK, "", { { "Content-Length", "0" },{ "Content-Type", "application/json" } });
+			stringstream ss;
+			out.writeToStream(ss);
 
+			session->close(OK, ss.str(), { { "Content-Length", ::to_string(ss.str().length()) },{ "Content-Type", "application/json" } });
+		}
+		catch (const otl_exception& e) {
+			cerr << e.msg << endl;
+			cerr << e.stm_text << endl;
+			cerr << e.var_info << endl;
+			session->close(INTERNAL_SERVER_ERROR);
+		}
+		catch (const exception& e)
+		{
+			string body;
+			body = "Unexpected exception: \"";
+			body += e.what();
+			body += "\"";
+			cerr << body << endl;
+			session->close(INTERNAL_SERVER_ERROR, body, { { "Content-Length", to_string(body.size()) },{ "Content-type", "text/html" } });
+		}
 	} );
 }
 
@@ -58,33 +77,24 @@ void CapstatsServer::player_get_json(const shared_ptr<Session> session)
     try
     {
         const auto request = session->get_request();
-        const unsigned int telegramId = stoi(request->get_query_parameter("telegramId", "0"));
+        const unsigned int telegramId = stoi(request->get_path_parameter("id"));
 
         Player player = playerDAO->getPlayer(telegramId);
 
-        Object playerJson;
-        playerJson["name"] = Value(player.getName());
-        playerJson["telegramId"] = Value((int)player.getTelegramId());
+		Value playerJson = playerToJson(player);
 
-        Object out;
-        out["player"] = playerJson;
-
-        stringstream stream;
-        Value(out).writeToStream(stream);
-        string response_body = stream.str();
+        stringstream ss;
+        playerJson.writeToStream(ss);
+        string response_body = ss.str();
 
         session->close(OK, response_body, { { "Content-Length", to_string(response_body.length()) },{ "Content-Type", "application/json" } });
-    }
-    catch (const PlayerNotFoundException& e)
-    {
-        string body(e.what());
-        session->close(NOT_FOUND, body, { {"Content-Length", to_string(body.size())}, {"Content-type", "text/html"}});
     }
     catch (const otl_exception& e)
     {
         cerr << e.msg << endl;
         cerr << e.stm_text << endl;
         cerr << e.var_info << endl;
+		session->close(INTERNAL_SERVER_ERROR);
     }
     catch (const exception& e)
     {
@@ -92,24 +102,30 @@ void CapstatsServer::player_get_json(const shared_ptr<Session> session)
         body = "Unexpected exception: \"";
         body += e.what();
         body += "\"";
-
         cerr << body << endl;
-
         session->close(INTERNAL_SERVER_ERROR, body, { {"Content-Length", to_string(body.size())}, {"Content-type", "text/html"} });
     }
 }
 
-void CapstatsServer::player_get_html(const shared_ptr<Session> session)
+JsonBox::Value CapstatsServer::playerToJson(const Player & player)
 {
-	const auto request = session->get_request();
-	const unsigned int telegramId = stoi(request->get_query_parameter("telegramId"));
+	JsonBox::Value out;
+	out["id"] = player.getId();
+	out["name"] = player.getName();
+	out["telegramId"] = player.getTelegramId();
+	out["telegramUsername"] = player.getTelegramUsername();
+	return out;
+}
 
-	Player player = playerDAO->getPlayer(telegramId);
-
-	string out_html = "<h1>" + player.getName() + "</h1><p><b>Telegram ID:</b>"  + to_string(player.getTelegramId()) + "</p>";
-
-	out_html += "<form action='player' method='post'><input type='text' name='name'><input type ='text' name='telegramId'><input type='submit'></form>";
-	session->close(OK, out_html, { { "Content-Length", to_string(out_html.length()) },{ "Content-Type", "text/html" } });
+Player CapstatsServer::jsonToPlayer(const JsonBox::Value & json)
+{
+	Player out;
+	Object obj = json.getObject();
+	out.setId(obj["id"].tryGetInteger(-1));
+	out.setName(obj["name"].tryGetString(""));
+	out.setTelegramId(obj["telegramId"].tryGetInteger(-1));
+	out.setTelegramUsername(obj["telegramUsername"].tryGetString(""));
+	return out;
 }
 
 
@@ -137,7 +153,7 @@ int CapstatsServer::run() {
 
 
 	auto user = make_shared<Resource>();
-	user->set_path("/player");
+	user->set_paths({ "/player", "/player/{id: [0-9]+}" });
 	user->set_method_handler("GET", bind1st(mem_fun(&CapstatsServer::player_get_json), this));
 	user->set_method_handler("POST", { { "Content-Type", "application/json" } }, bind1st(mem_fun(&CapstatsServer::player_post_json), this));
 
@@ -156,33 +172,6 @@ int CapstatsServer::run() {
     service.start( settings );
 
     return EXIT_SUCCESS;
-}
-
-// TODO: getting errors when i try to pass via constant reference.
-bool CapstatsServer::addPlayerJson(Object playerJson) {
-	Player out;
-	if (playerJson.count("name")) out.setName(playerJson["name"].tryGetString(""));
-	if (playerJson.count("telegramId")) out.setTelegramId(playerJson["telegramId"].tryGetInteger(-1));
-
-	return playerDAO->addPlayer(out);
-}
-
-Value CapstatsServer::getPlayerJson(long id) {
-	Object playerJson;
-	try {
-		Player player = playerDAO->getPlayer(id);
-
-		playerJson["name"] = Value(player.getName());
-		playerJson["telegramId"] = Value((int)player.getTelegramId());
-	}
-	catch (PlayerNotFoundException) {
-		
-	}
-
-	Object out;
-	out["player"] = playerJson;
-	
-	return out;
 }
 
 JsonBox::Value CapstatsServer::gameToJson(const Game & game)

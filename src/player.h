@@ -5,7 +5,7 @@
 
 class Player {
 public:
-	Player() : id(0), telegramId(0), name("") {};
+	Player() : id(-1), telegramId(-1), name("") {};
 	Player(long id) : Player() { Player::id = id; }
 
 	inline std::string getName() const { return name; }

@@ -9,23 +9,24 @@ using namespace std;
 void PlayerDAO::init() {
 	*db << "create table if not exists players("
 		"name varchar(100),"
-		"telegram_id int,"
-		"telegram_username varchar(100))";
+		"telegramId int,"
+		"telegramUsername varchar(100))";
 }
 
 bool PlayerDAO::addPlayer(Player &player) const
 {
 	otl_stream o(1,
 		"insert into players "
-		"(name, telegram_id, telegram_username)"
+		"(name, telegramId, telegramUsername)"
 		" values "
-		"(:name<char[100]>, :telegram_id<long>, :telegram_username<char[100]>)",
+		"(:name<char[100]>, :telegramId<long>, :telegramUsername<char[100]>)",
 		*db);
-	o
-		<< player.getName()
+	
+	o	<< player.getName()
 		<< player.getTelegramId()
 		<< player.getTelegramUsername();
 	o.flush();
+
 	otl_stream lastRowidStream(
 		1,
 		"select last_insert_rowid()",
@@ -33,7 +34,7 @@ bool PlayerDAO::addPlayer(Player &player) const
 	lastRowidStream.flush();
 	string rowid;
 	lastRowidStream >> rowid;
-	
+
 	player.setId(stol(rowid));
 
 	return true;
@@ -42,7 +43,7 @@ bool PlayerDAO::addPlayer(Player &player) const
 Player PlayerDAO::getPlayer(long id) const
 {
 	otl_stream o(50, 
-		"select name, telegram_id, telegram_username from players where rowid=:id<long>", 
+		"select name, telegramId, telegramUsername from players where rowid=:id<long>", 
 		*db);
 	o << id;
 	string name; long telegramId; string telegramUsername;
@@ -61,7 +62,7 @@ Player PlayerDAO::getPlayer(long id) const
 Player PlayerDAO::findPlayerByTelegramUsername(const string& telegramUsername)
 {
 	otl_stream o(50,
-		"select name, telegram_id, rowid from players where telegram_username=:telegram_username<char[100]>",
+		"select name, telegramId, rowid from players where telegramUsername=:telegramUsername<char[100]>",
 		*db);
 	o << telegramUsername;
 	string name; long telegramId; long id;

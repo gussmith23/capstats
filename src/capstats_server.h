@@ -33,7 +33,6 @@ public:
 	 */
 	void player_post_json(const std::shared_ptr<restbed::Session> session);
 	void player_get_json(const std::shared_ptr<restbed::Session> session);
-	void player_get_html(const std::shared_ptr<restbed::Session> session);
 
 	/**
 	 * Handles a POST request in JSON format to /game.
@@ -65,9 +64,8 @@ private:
 	std::shared_ptr<TeamDAO> teamDAO;
 	std::shared_ptr<GameDAO> gameDAO;
 
-	bool addPlayerJson(JsonBox::Object playerJson);
-	JsonBox::Value getPlayerJson(long id);
-
+	JsonBox::Value playerToJson(const Player& player);
+	Player jsonToPlayer(const JsonBox::Value& json);
 	JsonBox::Value gameToJson(const Game& game);
 };
 #endif

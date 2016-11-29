@@ -143,8 +143,9 @@ int CapstatsServer::run() {
 	//user->set_method_handler("GET", { {"Accept","text/html"} }, get_user_html);
 
 	auto game = make_shared<Resource>();
-	game->set_path("/game");
+	game->set_paths({ "/game", "/game/{id: [0-9]+}" });
 	game->set_method_handler("POST", { {"Content-Type", "application/json"} }, bind1st(mem_fun(&CapstatsServer::game_post_json), this));
+	game->set_method_handler("GET", { {"Accepts", "application/json"} }, bind1st(mem_fun(&CapstatsServer::game_get_json), this));
 
     auto settings = make_shared< Settings >();
     settings->set_port(port);
@@ -182,6 +183,27 @@ Value CapstatsServer::getPlayerJson(long id) {
 	Object out;
 	out["player"] = playerJson;
 	
+	return out;
+}
+
+JsonBox::Value CapstatsServer::gameToJson(const Game & game)
+{
+	Value out;
+	out["id"] = game.getId();
+	out["time"] = (int) game.getTime();
+	
+	map<int, Array> teams;
+	for (const auto& pair : game.getTeams())
+	{
+		if (teams.find(pair.first) == teams.end())
+			teams[pair.first] = Array();
+		teams[pair.first].push_back(Value(pair.second));
+	}
+	for (const auto& pair : teams)
+	{
+		out["teams"][to_string(pair.first)] = pair.second;
+	}
+
 	return out;
 }
 
@@ -227,5 +249,21 @@ void CapstatsServer::game_post_json(const std::shared_ptr<restbed::Session> sess
 		session->close(OK, jsonString, { { "Content-Length", to_string(jsonString.length()) },{ "Content-Type", "application/json" } });
 
 	});
+
+}
+
+void CapstatsServer::game_get_json(const std::shared_ptr<restbed::Session> session)
+{
+	const auto& request = session->get_request();
+
+	const long id = stol(request->get_path_parameter("id"));
+
+	Game game = gameDAO->getGame(id);
+
+	Value gameJson = gameToJson(game);
+	
+	stringstream ss; ss << gameJson;
+
+	session->close(OK, ss.str(), { { "Content-Length", ::to_string(ss.str().size()) } });
 
 }

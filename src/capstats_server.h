@@ -45,6 +45,8 @@ public:
 	 * }
 	 */
 	void game_post_json(const std::shared_ptr<restbed::Session> session);
+
+	void game_get_json(const std::shared_ptr<restbed::Session> session);
 private:
 	uint16_t port;
 	std::string databasePath;
@@ -57,5 +59,7 @@ private:
 
 	bool addPlayerJson(JsonBox::Object playerJson);
 	JsonBox::Value getPlayerJson(long id);
+
+	JsonBox::Value gameToJson(const Game& game);
 };
 #endif

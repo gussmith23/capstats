@@ -1,10 +1,29 @@
 import requests
+import unittest
 
-url = 'http://localhost:23232/player' # Set destination URL here
+player_url = 'http://localhost:23232/player' # Set destination URL here
+game_url =  'http://localhost:23232/game'
 
-post_params = {'telegramId': '1', 'name': 'gus'}
-r = requests.post(url, json = post_params)
+class Tests(unittest.TestCase):
+  def test_add_get_game(self):
+    post_params = {
+      'teams': {
+        '1' : [1,2,3],
+        '2' : [4,5,6]
+      },
+      'scores': {
+        '1' : 11,
+        '2' : 9
+      }
+    }
+    r = requests.post(game_url, json = post_params)
+    json = r.json()
+    
+    self.assertTrue(json['id'] >= 0)
+    
+    for key in post_params.keys():
+      self.assertEqual(post_params[key], json[key])
 
-get_params = {'telegramId': '1'}
-r = requests.get(url, params=get_params)
-print(r.json())
+    r = requests.get(game_url + "/" + str(json['id']), headers={'Accepts':'application/json'})
+    print(r.json())
+    

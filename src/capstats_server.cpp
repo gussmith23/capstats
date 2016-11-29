@@ -29,7 +29,7 @@ using namespace std;
 using namespace restbed;
 using namespace JsonBox;
 
-void CapstatsServer::post_user_handler( const shared_ptr< Session > session )
+void CapstatsServer::player_post_json( const shared_ptr< Session > session )
 {
     const auto request = session->get_request( );
 
@@ -53,7 +53,7 @@ void CapstatsServer::post_user_handler( const shared_ptr< Session > session )
 	} );
 }
 
-void CapstatsServer::get_user_handler(const shared_ptr<Session> session)
+void CapstatsServer::player_get_json(const shared_ptr<Session> session)
 {
     try
     {
@@ -99,7 +99,7 @@ void CapstatsServer::get_user_handler(const shared_ptr<Session> session)
     }
 }
 
-void CapstatsServer::get_user_html(const shared_ptr<Session> session)
+void CapstatsServer::player_get_html(const shared_ptr<Session> session)
 {
 	const auto request = session->get_request();
 	const unsigned int telegramId = stoi(request->get_query_parameter("telegramId"));
@@ -138,17 +138,17 @@ int CapstatsServer::run() {
 
 	auto user = make_shared<Resource>();
 	user->set_path("/player");
-	user->set_method_handler("GET", bind1st(mem_fun(&CapstatsServer::get_user_handler), this));
-	user->set_method_handler("POST", bind1st(mem_fun(&CapstatsServer::post_user_handler), this));
+	user->set_method_handler("GET", bind1st(mem_fun(&CapstatsServer::player_get_json), this));
+	user->set_method_handler("POST", { { "Content-Type", "application/json" } }, bind1st(mem_fun(&CapstatsServer::player_post_json), this));
 
 	auto game = make_shared<Resource>();
 	game->set_paths({ "/game", "/game/{id: [0-9]+}" });
-	game->set_method_handler("GET", { { "Accepts", "application/json" } }, bind1st(mem_fun(&CapstatsServer::game_get_json), this));
+	game->set_method_handler("GET", bind1st(mem_fun(&CapstatsServer::game_get_json), this));
 	game->set_method_handler("POST", { {"Content-Type", "application/json"} }, bind1st(mem_fun(&CapstatsServer::game_post_json), this));
 
     auto settings = make_shared< Settings >();
     settings->set_port(port);
-    settings->set_default_header("Connection", "close");
+    settings->set_default_header("Connection", "close");	
 
     Service service;
 	service.publish(user);

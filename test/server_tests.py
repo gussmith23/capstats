@@ -27,3 +27,4 @@ class Tests(unittest.TestCase):
     r = requests.get(game_url + "/" + str(json['id']), headers={'Accepts':'application/json'})
     print(r.json())
     
+  def test_add_get_game(self)

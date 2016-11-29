@@ -23,14 +23,22 @@ public:
 	void init();
 	int run();
 
-	void post_user_handler(const std::shared_ptr<restbed::Session> session);
-	void get_user_handler(const std::shared_ptr<restbed::Session> session);
-	void get_user_html(const std::shared_ptr<restbed::Session> session);
+	/**
+	 * Handles a post request in JSON format to /player.
+	 * The format of the player should be:
+	 *	{
+	 *		'name' : name,
+	 *		'telegramId' : telegramId
+	 *	}
+	 */
+	void player_post_json(const std::shared_ptr<restbed::Session> session);
+	void player_get_json(const std::shared_ptr<restbed::Session> session);
+	void player_get_html(const std::shared_ptr<restbed::Session> session);
 
 	/**
 	 * Handles a POST request in JSON format to /game.
 	 * The format of the game should be:
-	 * {
+	 *	{
 	 *		teams : {
 	 *			teamid : [playerid, playerid, playerid, ...],
 	 *			teamid : [playerid, playerid, playerid, ...],
@@ -42,11 +50,11 @@ public:
 	 *			...
 	 *		},
 	 *		time : time
-	 * }
+	 *	}
 	 */
 	void game_post_json(const std::shared_ptr<restbed::Session> session);
-
 	void game_get_json(const std::shared_ptr<restbed::Session> session);
+
 private:
 	uint16_t port;
 	std::string databasePath;

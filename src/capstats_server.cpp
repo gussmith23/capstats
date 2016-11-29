@@ -140,12 +140,11 @@ int CapstatsServer::run() {
 	user->set_path("/player");
 	user->set_method_handler("GET", bind1st(mem_fun(&CapstatsServer::get_user_handler), this));
 	user->set_method_handler("POST", bind1st(mem_fun(&CapstatsServer::post_user_handler), this));
-	//user->set_method_handler("GET", { {"Accept","text/html"} }, get_user_html);
 
 	auto game = make_shared<Resource>();
 	game->set_paths({ "/game", "/game/{id: [0-9]+}" });
+	game->set_method_handler("GET", { { "Accepts", "application/json" } }, bind1st(mem_fun(&CapstatsServer::game_get_json), this));
 	game->set_method_handler("POST", { {"Content-Type", "application/json"} }, bind1st(mem_fun(&CapstatsServer::game_post_json), this));
-	game->set_method_handler("GET", { {"Accepts", "application/json"} }, bind1st(mem_fun(&CapstatsServer::game_get_json), this));
 
     auto settings = make_shared< Settings >();
     settings->set_port(port);

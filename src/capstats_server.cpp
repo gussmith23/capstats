@@ -138,7 +138,7 @@ int CapstatsServer::run() {
 
 	auto user = make_shared<Resource>();
 	user->set_path("/player");
-	user->set_method_handler(string("GET"), bind1st(mem_fun(&CapstatsServer::get_user_handler), this));
+	user->set_method_handler("GET", bind1st(mem_fun(&CapstatsServer::get_user_handler), this));
 	user->set_method_handler("POST", bind1st(mem_fun(&CapstatsServer::post_user_handler), this));
 	//user->set_method_handler("GET", { {"Accept","text/html"} }, get_user_html);
 

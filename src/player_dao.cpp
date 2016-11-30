@@ -51,7 +51,7 @@ Player PlayerDAO::getPlayer(long id) const
 		o >> name >> telegramId >> telegramUsername;
 	else return Player(-1);
 
-	Player out;
+	Player out(id);
 	out.setName(name);
 	out.setTelegramId(telegramId);
 	out.setTelegramUsername(telegramUsername);

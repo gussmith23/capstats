@@ -24,9 +24,9 @@ class Tests(unittest.TestCase):
     for key in post_params.keys():
       self.assertEqual(post_params[key], json[key])
 
-    r = requests.get(game_url + "/" + str(json['id']), headers={'Accepts':'application/json'})
+    r = requests.get(game_url + "/" + str(json['id']))
     
-  def test_add_get_player(self):
+  def test_add_get__update_player(self):
     post_params = {
       'telegramId' : 1,
       'name' : 'gus'
@@ -40,13 +40,27 @@ class Tests(unittest.TestCase):
     for key in post_params.keys():
       self.assertEqual(post_params[key], json[key])
 
-    r = requests.get(player_url + "/" + str(json['id']), headers={'Accepts':'application/json'})
+    r = requests.get(player_url + "/" + str(json['id']))
+    json = r.json()
+    
+    for key in post_params.keys():
+      self.assertEqual(post_params[key], json[key])
+    
+    post_params['name'] = 'henry'
+    r = requests.put(player_url + "/" + str(json['id']), json = post_params)
+    r = requests.get(player_url + "/" + str(json['id']))
+    json = r.json()
+    
+    for key in post_params.keys():
+      self.assertEqual(post_params[key], json[key])
+    
+        
     
   def test_get_unknown_player(self):
     r = requests.get(player_url + "/420")
-    print(r.json())
     
   def test_get_player_no_id(self):
     r = requests.get(player_url)
+    
 
  

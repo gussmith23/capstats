@@ -90,6 +90,24 @@ TEST_CASE("Player DAO") {
 			FAIL();
 		}
 	}
+
+	SECTION("Update player") {
+		try {
+			Player in; in.setName("gus");
+			player_dao.addPlayer(in);
+			in.setName("henry");
+			player_dao.updatePlayer(in);
+			Player out = player_dao.getPlayer(in.getId());
+			REQUIRE(out.getName() == "henry");
+		}
+		catch (const otl_exception& e) {
+			cout << e.msg << endl << e.stm_text << endl << e.var_info << endl;
+			FAIL();
+		}
+		catch (...) {
+			FAIL();
+		}
+	}
 }
 
 TEST_CASE("Game DAO") {

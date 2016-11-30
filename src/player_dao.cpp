@@ -78,3 +78,18 @@ Player PlayerDAO::findPlayerByTelegramUsername(const string& telegramUsername)
 
 	return out;
 }
+
+bool PlayerDAO::updatePlayer(const Player& player) const
+{
+	otl_stream update(1,
+		"update players "
+		"set name=:name<char[100]>, telegramId=:telegramId<long>, telegramUsername=:telegramUsername<char[100]> "
+		"where rowid=:rowid<long>",
+		*db);
+	update << player.getName()
+		<< player.getTelegramId()
+		<< player.getTelegramUsername()
+		<< player.getId();
+	update.flush();
+	return true;
+}

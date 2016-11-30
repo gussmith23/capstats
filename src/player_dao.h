@@ -36,6 +36,15 @@ public:
 	 *	set to -1, then the player was not found.
      */
 	Player findPlayerByTelegramUsername(const std::string& telegramUsername);
+
+	/**
+	 * Updates player in the database. Note that the update will happen based
+	 * on the id of the Player object, so it must be a valid id.
+	 * \param player the player to update, containing the new data to put in
+	 *		the database.
+	 * \return true if success.
+	 */
+	bool updatePlayer(const Player& player) const;
 };
 
 #endif

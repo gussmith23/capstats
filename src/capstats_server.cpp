@@ -77,9 +77,12 @@ void CapstatsServer::player_get_json(const shared_ptr<Session> session)
     try
     {
         const auto request = session->get_request();
-        const unsigned int telegramId = stoi(request->get_path_parameter("id"));
+		string idPathParameterString = request->get_path_parameter("id");
+		unsigned long id;
+		if (idPathParameterString == "") id = -1;
+		else id = stoi(idPathParameterString);
 
-        Player player = playerDAO->getPlayer(telegramId);
+        Player player = playerDAO->getPlayer(id);
 
 		Value playerJson = playerToJson(player);
 
@@ -105,6 +108,10 @@ void CapstatsServer::player_get_json(const shared_ptr<Session> session)
         cerr << body << endl;
         session->close(INTERNAL_SERVER_ERROR, body, { {"Content-Length", to_string(body.size())}, {"Content-type", "text/html"} });
     }
+}
+
+void CapstatsServer::players_get_json(const std::shared_ptr<restbed::Session> session)
+{
 }
 
 JsonBox::Value CapstatsServer::playerToJson(const Player & player)
@@ -152,23 +159,31 @@ void CapstatsServer::init() {
 int CapstatsServer::run() {
 
 
-	auto user = make_shared<Resource>();
-	user->set_paths({ "/player", "/player/{id: [0-9]+}" });
-	user->set_method_handler("GET", bind1st(mem_fun(&CapstatsServer::player_get_json), this));
-	user->set_method_handler("POST", { { "Content-Type", "application/json" } }, bind1st(mem_fun(&CapstatsServer::player_post_json), this));
+	auto playerWithId = make_shared<Resource>();
+	playerWithId->set_path("/player/{id: [0-9]+}");
+	playerWithId->set_method_handler("GET", bind1st(mem_fun(&CapstatsServer::player_get_json), this));
+	auto player = make_shared<Resource>();
+	player->set_path("/player");
+	player->set_method_handler("POST", bind1st(mem_fun(&CapstatsServer::player_post_json), this));
 
+	auto gameWithId = make_shared<Resource>();
+	gameWithId->set_path("/game/{id: [0-9]+}");
+	gameWithId->set_method_handler("GET", bind1st(mem_fun(&CapstatsServer::game_get_json), this));
 	auto game = make_shared<Resource>();
-	game->set_paths({ "/game", "/game/{id: [0-9]+}" });
-	game->set_method_handler("GET", bind1st(mem_fun(&CapstatsServer::game_get_json), this));
-	game->set_method_handler("POST", { {"Content-Type", "application/json"} }, bind1st(mem_fun(&CapstatsServer::game_post_json), this));
+	game->set_path("/game");
+	game->set_method_handler("POST", bind1st(mem_fun(&CapstatsServer::game_post_json), this));
+
+
 
     auto settings = make_shared< Settings >();
     settings->set_port(port);
     settings->set_default_header("Connection", "close");	
 
     Service service;
-	service.publish(user);
+	service.publish(player);
+	service.publish(playerWithId);
 	service.publish(game);
+	service.publish(gameWithId);
     service.start( settings );
 
     return EXIT_SUCCESS;

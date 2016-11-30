@@ -45,4 +45,8 @@ class Tests(unittest.TestCase):
   def test_get_unknown_player(self):
     r = requests.get(player_url + "/420")
     print(r.json())
+    
+  def test_get_player_no_id(self):
+    r = requests.get(player_url)
+
  

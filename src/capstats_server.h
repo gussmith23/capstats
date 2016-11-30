@@ -32,7 +32,19 @@ public:
 	 *	}
 	 */
 	void player_post_json(const std::shared_ptr<restbed::Session> session);
+	/**
+	 * Get a single player by id. E.g. GET /player/[id].
+	 */
 	void player_get_json(const std::shared_ptr<restbed::Session> session);
+	/**
+	 * Get a list of players. E.g. GET /player.
+	 */
+	void players_get_json(const std::shared_ptr<restbed::Session> session);
+	/**
+	 * Update a player at a given url. That is, the PUT request should be made
+	 * to /player/[id] to update the player with id [id].
+	 */
+	void player_put_json(const std::shared_ptr<restbed::Session> session);
 
 	/**
 	 * Handles a POST request in JSON format to /game.

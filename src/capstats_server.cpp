@@ -52,7 +52,10 @@ void CapstatsServer::player_post_json( const shared_ptr< Session > session )
 			stringstream ss;
 			out.writeToStream(ss);
 
-			session->close(OK, ss.str(), { { "Content-Length", ::to_string(ss.str().length()) },{ "Content-Type", "application/json" } });
+			session->close(CREATED, ss.str(), 
+					{ { "Content-Length", ::to_string(ss.str().length()) },
+					{ "Content-Type", "application/json" },
+					{ "Location", "/" + ::to_string(in.getId())} });
 		}
 		catch (const otl_exception& e) {
 			cerr << e.msg << endl;
@@ -84,13 +87,21 @@ void CapstatsServer::player_get_json(const shared_ptr<Session> session)
 
         Player player = playerDAO->getPlayer(id);
 
+		if (player.getId() < 0) {
+			session->close(NOT_FOUND);
+			return;
+		}
+
 		Value playerJson = playerToJson(player);
 
         stringstream ss;
         playerJson.writeToStream(ss);
         string response_body = ss.str();
 
-        session->close(OK, response_body, { { "Content-Length", to_string(response_body.length()) },{ "Content-Type", "application/json" } });
+        session->close(OK, response_body, 
+				{ { "Content-Length", to_string(response_body.length()) },
+				{ "Content-Type", "application/json" },
+				{ "Location", "/" + ::to_string(player.getId())} });
     }
     catch (const otl_exception& e)
     {
@@ -164,7 +175,7 @@ void CapstatsServer::player_put_json(const std::shared_ptr<restbed::Session> ses
 JsonBox::Value CapstatsServer::playerToJson(const Player & player)
 {
 	JsonBox::Value out;
-	out["id"] = player.getId();
+	//out["id"] = player.getId();
 	out["name"] = player.getName();
 	out["telegramId"] = player.getTelegramId();
 	out["telegramUsername"] = player.getTelegramUsername();
@@ -175,7 +186,7 @@ Player CapstatsServer::jsonToPlayer(const JsonBox::Value & json)
 {
 	Player out;
 	Object obj = json.getObject();
-	out.setId(obj["id"].tryGetInteger(-1));
+	//out.setId(obj["id"].tryGetInteger(-1));
 	out.setName(obj["name"].tryGetString(""));
 	out.setTelegramId(obj["telegramId"].tryGetInteger(-1));
 	out.setTelegramUsername(obj["telegramUsername"].tryGetString(""));

@@ -117,7 +117,7 @@ std::vector<Player> PlayerDAO::findPlayers(long id, const std::string & name,
 		long telegramId_out = -1;
 		string telegramUsername_out = "";
 
-		select >> name_out >> id_out >> telegramUsername_out >> telegramId_out;
+		select >> name_out >> telegramId_out >> telegramUsername_out >> id_out;
 
 		Player p;
 		p.setId(id_out); p.setName(name_out); p.setTelegramId(telegramId_out);

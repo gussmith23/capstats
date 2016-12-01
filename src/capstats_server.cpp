@@ -127,30 +127,23 @@ void CapstatsServer::playerWithoutId_get_json(const std::shared_ptr<restbed::Ses
 	{
 		const auto request = session->get_request();
 
-		// Get by telegramId.
 		string telegramUsername = request->get_query_parameter("telegramUsername");
+		string name = request->get_query_parameter("name");
+		long telegramId = -1;
+		string telegramId_string = request->get_query_parameter("telegramId");
+		if (telegramId_string != "") telegramId = ::stol(telegramId_string);
 
-		Player player;
+		vector<Player> players = playerDAO->findPlayers(-1, name, telegramId, telegramUsername);
 
-		if (telegramUsername != "") {
-			player = playerDAO->findPlayerByTelegramUsername(telegramUsername);
-		}
-
-		if (player.getId() < 0) {
-			session->close(NOT_FOUND);
-			return;
-		}
-
-		Value playerJson = playerToJson(player);
+		Value playersJson = playersToJson(players);
 
 		stringstream ss;
-		playerJson.writeToStream(ss);
+		playersJson.writeToStream(ss);
 		string response_body = ss.str();
 
 		session->close(OK, response_body,
 			{ { "Content-Length", to_string(response_body.length()) },
-			{ "Content-Type", "application/json" },
-			{ "Location", "/" + ::to_string(player.getId()) } });
+			{ "Content-Type", "application/json" } });
 	}
 	catch (const otl_exception& e)
 	{
@@ -238,7 +231,12 @@ Player CapstatsServer::jsonToPlayer(const JsonBox::Value & json)
 	return out;
 }
 
-
+JsonBox::Value CapstatsServer::playersToJson(const std::vector<Player>& players)
+{
+	Array out;
+	for (Player player : players) out.push_back(playerToJson(player));
+	return Value(out);
+}
 
 void CapstatsServer::init() {
 
@@ -269,6 +267,7 @@ int CapstatsServer::run() {
 	auto player = make_shared<Resource>();
 	player->set_path("/player");
 	player->set_method_handler("POST", bind1st(mem_fun(&CapstatsServer::player_post_json), this));
+	player->set_method_handler("GET", bind1st(mem_fun(&CapstatsServer::playerWithoutId_get_json), this));
 
 	auto gameWithId = make_shared<Resource>();
 	gameWithId->set_path("/game/{id: [0-9]+}");

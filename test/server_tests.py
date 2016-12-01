@@ -44,7 +44,6 @@ class Tests(unittest.TestCase):
       self.assertEqual(post_params[key], json[key])
 
     r = requests.get(player_url + location)
-    print(player_url + location)
     self.assertEqual(r.status_code, 200)
     json = r.json()
     
@@ -63,8 +62,37 @@ class Tests(unittest.TestCase):
     r = requests.get(player_url + "/42069")
     self.assertEqual(r.status_code, 404)
     
+  # tests uri /player WITHOUT giving an id. tests /player, /player?param=val,
+  # etc.
   def test_get_player_no_id(self):
     r = requests.get(player_url)
+    self.assertTrue(len(r.json()) >= 0)
+    
+    players =[ {
+      'name' : 'gusss',
+      'telegramId' : 1
+    },{
+      'name' : 'henryyy',
+      'telegramId' : 2
+    },{
+      'name' : 'gusss',
+      'telegramId' : 3
+    }]
+    
+    for player in players: requests.post(player_url, json=player)
+
+    r = requests.get(player_url, params={'name':'gusss'})
+    json = r.json()
+    self.assertTrue(len(json) >= 2)
+    
+    r = requests.get(player_url, params={'name':'henryyy'})
+    json = r.json()
+    self.assertTrue(len(json) >= 1)
+    
+    r = requests.get(player_url, params={'name':'gusss', 'telegramId' : 3})
+    json = r.json()
+    self.assertTrue(len(json) >= 1)
+
     
 
  

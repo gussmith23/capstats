@@ -9,6 +9,7 @@
 #include "include_otl.h"
 #include <memory>
 #include <string>
+#include <vector>
 
 class CapstatsServer {
 public:
@@ -78,6 +79,7 @@ private:
 
 	JsonBox::Value playerToJson(const Player& player);
 	Player jsonToPlayer(const JsonBox::Value& json);
+	JsonBox::Value playersToJson(const std::vector<Player>& players);
 	JsonBox::Value gameToJson(const Game& game);
 };
 #endif

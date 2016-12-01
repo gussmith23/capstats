@@ -121,8 +121,53 @@ void CapstatsServer::player_get_json(const shared_ptr<Session> session)
     }
 }
 
-void CapstatsServer::players_get_json(const std::shared_ptr<restbed::Session> session)
+void CapstatsServer::playerWithoutId_get_json(const std::shared_ptr<restbed::Session> session)
 {
+	try
+	{
+		const auto request = session->get_request();
+
+		// Get by telegramId.
+		string telegramUsername = request->get_query_parameter("telegramUsername");
+
+		Player player;
+
+		if (telegramUsername != "") {
+			player = playerDAO->findPlayerByTelegramUsername(telegramUsername);
+		}
+
+		if (player.getId() < 0) {
+			session->close(NOT_FOUND);
+			return;
+		}
+
+		Value playerJson = playerToJson(player);
+
+		stringstream ss;
+		playerJson.writeToStream(ss);
+		string response_body = ss.str();
+
+		session->close(OK, response_body,
+			{ { "Content-Length", to_string(response_body.length()) },
+			{ "Content-Type", "application/json" },
+			{ "Location", "/" + ::to_string(player.getId()) } });
+	}
+	catch (const otl_exception& e)
+	{
+		cerr << e.msg << endl;
+		cerr << e.stm_text << endl;
+		cerr << e.var_info << endl;
+		session->close(INTERNAL_SERVER_ERROR);
+	}
+	catch (const exception& e)
+	{
+		string body;
+		body = "Unexpected exception: \"";
+		body += e.what();
+		body += "\"";
+		cerr << body << endl;
+		session->close(INTERNAL_SERVER_ERROR, body, { { "Content-Length", to_string(body.size()) },{ "Content-type", "text/html" } });
+	}
 	session->close(NOT_IMPLEMENTED);
 }
 

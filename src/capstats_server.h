@@ -37,9 +37,9 @@ public:
 	 */
 	void player_get_json(const std::shared_ptr<restbed::Session> session);
 	/**
-	 * Get a list of players. E.g. GET /player.
+	 * Search for a player. E.g. GET /player?telegramId=1. 
 	 */
-	void players_get_json(const std::shared_ptr<restbed::Session> session);
+	void playerWithoutId_get_json(const std::shared_ptr<restbed::Session> session);
 	/**
 	 * Update a player at a given url. That is, the PUT request should be made
 	 * to /player/[id] to update the player with id [id].

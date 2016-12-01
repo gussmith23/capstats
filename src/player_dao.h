@@ -38,6 +38,12 @@ public:
 	Player findPlayerByTelegramUsername(const std::string& telegramUsername);
 
 	/**
+	 * Find a player with the given fields.
+	 */
+	std::vector<Player> findPlayers(long id = -1, const std::string& name = "",
+		long telegramId = -1, const std::string& telegramUsername = "");
+
+	/**
 	 * Updates player in the database. Note that the update will happen based
 	 * on the id of the Player object, so it must be a valid id.
 	 * \param player the player to update, containing the new data to put in

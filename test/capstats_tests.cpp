@@ -108,6 +108,47 @@ TEST_CASE("Player DAO") {
 			FAIL();
 		}
 	}
+
+	SECTION("Find players") {
+		try {
+			map<int, Player> players;
+
+			Player in;
+			in.setName("gus"); in.setTelegramUsername("justgus"); in.setTelegramId(1);
+			player_dao.addPlayer(in);
+
+			Player in2;
+			in2.setName("henry"); in2.setTelegramUsername("justhenry"); in2.setTelegramId(2);
+			player_dao.addPlayer(in2);
+
+			Player in3;
+			in3.setName("henry"); in3.setTelegramUsername("justhenryy"); in3.setTelegramId(3);
+			player_dao.addPlayer(in3);
+
+			//players.insert(pair<int,Player>(in.getId(), in));
+
+			vector<Player> out = player_dao.findPlayers(1);
+			REQUIRE(out.size() == 1);
+			REQUIRE(out[0].getName() == "gus");
+
+			out = player_dao.findPlayers(-1, "henry");
+			REQUIRE(out.size() == 2);
+
+			out = player_dao.findPlayers(100, "in 1844, meridian time ", 101, "personnel met in");
+			REQUIRE(out.size() == 0);
+
+			out = player_dao.findPlayers();
+			REQUIRE(out.size() == 3);
+
+		}
+		catch (const otl_exception& e) {
+			cout << e.msg << endl << e.stm_text << endl << e.var_info << endl;
+			FAIL();
+		}
+		catch (...) {
+			FAIL();
+		}
+	}
 }
 
 TEST_CASE("Game DAO") {

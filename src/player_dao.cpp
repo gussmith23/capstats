@@ -3,6 +3,7 @@
 #include "capstats_exceptions.h"
 #include <string>
 #include <mutex>
+#include <sstream>
 
 using namespace std;
 
@@ -75,6 +76,55 @@ Player PlayerDAO::findPlayerByTelegramUsername(const string& telegramUsername)
 	out.setName(name);
 	out.setTelegramId(telegramId);
 	out.setTelegramUsername(telegramUsername);
+
+	return out;
+}
+
+std::vector<Player> PlayerDAO::findPlayers(long id, const std::string & name, 
+	long telegramId, const std::string & telegramUsername)
+{
+	stringstream selectStringBase;
+	selectStringBase << "select name, telegramId, telegramUsername, rowid ";
+	selectStringBase << "from players ";
+	
+	vector<string> whereClauses;
+	if (id >= 0) whereClauses.push_back("rowid=:rowid<long>");
+	if (name != "") whereClauses.push_back("name=:name<char[100]>");
+	if (telegramId >= 0) whereClauses.push_back("telegramId=:telegramId<long>");
+	if (telegramUsername != "") whereClauses.push_back("telegramUsername=:telegramUsername<char[100]>");
+
+	stringstream whereClauseString;
+	if (whereClauses.size() > 0) {
+		whereClauseString << "where ";
+		std::copy(whereClauses.begin(), whereClauses.end() - 1, ostream_iterator<string>(whereClauseString, " AND "));
+		whereClauseString << whereClauses.back();
+	}
+
+	string selectString = selectStringBase.str() + whereClauseString.str();
+	otl_stream select(50,
+		selectString.c_str(),
+		*db);
+
+	if (id >= 0) select << id;
+	if (name != "") select << name;
+	if (telegramId >= 0) select << telegramId;
+	if (telegramUsername != "") select << telegramUsername;
+
+	vector<Player> out;
+	while (!select.eof()) {
+		long id_out = -1; 
+		string name_out = "";
+		long telegramId_out = -1;
+		string telegramUsername_out = "";
+
+		select >> name_out >> id_out >> telegramUsername_out >> telegramId_out;
+
+		Player p;
+		p.setId(id_out); p.setName(name_out); p.setTelegramId(telegramId_out);
+		p.setTelegramUsername(telegramUsername_out);
+
+		out.push_back(p);
+	}
 
 	return out;
 }

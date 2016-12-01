@@ -10,7 +10,7 @@ using namespace std;
 void PlayerDAO::init() {
 	*db << "create table if not exists players("
 		"name varchar(100),"
-		"telegramId int,"
+		"telegramId int unique,"
 		"telegramUsername varchar(100))";
 }
 

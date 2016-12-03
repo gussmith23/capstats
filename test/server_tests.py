@@ -1,10 +1,32 @@
 import requests
 import unittest
+import subprocess
+import threading
+from multiprocessing import Process
+import time
+import os
+import signal
 
-player_url = 'http://localhost:23232/player' # Set destination URL here
+
+player_url = 'http://localhost:23232/player'
 game_url =  'http://localhost:23232/game'
 
-class Tests(unittest.TestCase):
+server_path = ""
+if (os.name == "nt"): server_path = r'..\build\Debug\capstats_server.exe'
+elif (os.name == "posix"): server_path = "" #todo: what should this be?
+
+def startServer():
+  subprocess.call([server_path])
+    
+  
+class Tests(unittest.TestCase):  
+    
+  def setUp(self):
+    self.p = subprocess.Popen(server_path)
+    
+  def tearDown(self):
+    os.kill(self.p.pid, signal.SIGTERM) 
+
   def test_add_get_game(self):
     post_params = {
       'teams': {
@@ -64,34 +86,38 @@ class Tests(unittest.TestCase):
     
   # tests uri /player WITHOUT giving an id. tests /player, /player?param=val,
   # etc.
-  def test_get_player_no_id(self):
-    r = requests.get(player_url)
-    self.assertTrue(len(r.json()) >= 0)
-    
+  def test_get_player_no_id(self):    
     players =[ {
-      'name' : 'gusss',
+      'name' : 'gus',
       'telegramId' : 1
     },{
-      'name' : 'henryyy',
+      'name' : 'henry',
       'telegramId' : 2
     },{
-      'name' : 'gusss',
+      'name' : 'gus',
       'telegramId' : 3
     }]
     
     for player in players: requests.post(player_url, json=player)
+    
+    r = requests.get(player_url)
+    self.assertTrue(len(r.json()) == 3)
 
-    r = requests.get(player_url, params={'name':'gusss'})
+    r = requests.get(player_url, params={'name':'gus'})
     json = r.json()
-    self.assertTrue(len(json) >= 2)
+    self.assertTrue(len(json) == 2)
     
-    r = requests.get(player_url, params={'name':'henryyy'})
+    r = requests.get(player_url, params={'name':'henry'})
     json = r.json()
-    self.assertTrue(len(json) >= 1)
+    self.assertTrue(len(json) == 1)
     
-    r = requests.get(player_url, params={'name':'gusss', 'telegramId' : 3})
+    r = requests.get(player_url, params={'name':'gus', 'telegramId' : 3})
     json = r.json()
-    self.assertTrue(len(json) >= 1)
+    self.assertTrue(len(json) == 1)
+    
+    r = requests.get(player_url, params={'name':'gus', 'telegramId' : 2})
+    json = r.json()
+    self.assertTrue(len(json) == 0)
 
     
 

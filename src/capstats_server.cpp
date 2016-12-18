@@ -245,6 +245,11 @@ void CapstatsServer::init() {
 	try {
 		string connectionString = "DRIVER=SQLite3 ODBC Driver;Database=" + databasePath + ";";
 		*db << connectionString.c_str();
+
+		// SQLite foreign keys
+		// TODO foreign keys not working it seems.
+		*db << "PRAGMA foreign_keys = ON";
+
 		playerDAO->init();
 		gameDAO->init();
 		teamDAO->init();
@@ -373,6 +378,12 @@ void CapstatsServer::game_get_json(const std::shared_ptr<restbed::Session> sessi
 	const long id = stol(request->get_path_parameter("id"));
 
 	Game game = gameDAO->getGame(id);
+
+	if (game.getId() < 0)
+	{
+		session->close(NOT_FOUND);
+		return;
+	}
 
 	Value gameJson = gameToJson(game);
 	

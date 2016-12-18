@@ -6,6 +6,7 @@
 #include "game_dao.h"
 #include "game.h"
 #include "team_dao.h"
+#include "points_dao.h"
 #include "capstats_exceptions.h"
 #include <iostream>
 #include <string>
@@ -229,7 +230,7 @@ TEST_CASE("Team DAO")
 
 	SECTION("Add and get team.")
 	{
-		multimap<int, long> in = { {1,2}, {1, 23}, {0, 69}, {0, 420}, {4, 10} };
+		multimap<int, long> in = { { 1,2 },{ 1, 23 },{ 0, 69 },{ 0, 420 },{ 4, 10 } };
 		teamDAO->addTeams(1, in);
 		multimap<int, long> out = teamDAO->getTeams(1);
 		REQUIRE(in == out);
@@ -243,5 +244,39 @@ TEST_CASE("Team DAO")
 		REQUIRE(teamDAO->updateTeams(1, in));
 		multimap<int, long> out = teamDAO->getTeams(1);
 		REQUIRE(in == out);
+	}
+}
+
+TEST_CASE("Points DAO")
+{
+	try {
+		otl_connect::otl_initialize();
+		shared_ptr<otl_connect> db(new otl_connect);
+		*db << "DRIVER=SQLite3 ODBC Driver;Database=:memory:;";
+
+		shared_ptr<PointsDAO> pointsDAO(new PointsDAO(db));
+		pointsDAO->init();
+
+		SECTION("Add and get points.")
+		{
+			multimap<int, int> in = { { 1,2 }, { 0, 69 }, { 4, 10 } };
+			pointsDAO->addPoints(1, in);
+			multimap<int, int> out = pointsDAO->getPoints(1);
+			REQUIRE(in == out);
+		}
+
+		SECTION("Update points")
+		{
+			multimap<int, int> in = { { 1,2 }, { 0, 69 }, { 4, 10 } };
+			pointsDAO->addPoints(1, in);
+			in.insert(pair<int, long>(5, 6));
+			REQUIRE(pointsDAO->updatePoints(1, in));
+			multimap<int, int> out = pointsDAO->getPoints(1);
+			REQUIRE(in == out);
+		}
+	}
+	catch (otl_exception e) {
+		cerr << e.msg << endl << e.stm_text << endl << e.var_info << endl;
+		FAIL();
 	}
 }

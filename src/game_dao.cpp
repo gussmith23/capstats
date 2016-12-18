@@ -57,3 +57,23 @@ bool GameDAO::addGame(Game &game) const
 
 	return true;
 }
+
+bool GameDAO::updateGame(const Game & game) const
+{
+	if (!teamDAO->updateTeams(game.getId(), game.getTeams())) return false;
+	
+	try {
+		otl_stream update(1,
+			"update games "
+			"set timestamp=:timestamp<long> "
+			"where rowid=:rowid<long>",
+			*db);
+		update << static_cast<long>(game.getTime())
+			<< game.getId();
+		update.flush();
+		return true;
+	}
+	catch (otl_exception) {
+		return false;
+	}
+}

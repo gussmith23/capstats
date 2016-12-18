@@ -197,6 +197,24 @@ TEST_CASE("Game DAO") {
 			FAIL();
 		}
 	}
+	SECTION("update game") {
+		Game g;
+		g.setTime(23);
+		long idBeforeAdd = g.getId();
+		multimap<int, long> teams = { { 1,2 },{ 3,4 },{ 3,5 },{ 6,7 } };
+		g.setTeams(teams);
+		gameDAO->addGame(g);
+
+		teams.insert(pair<int, long>(8, 9));
+		g.setTeams(teams);
+		g.setTime(24);
+		
+		REQUIRE(gameDAO->updateGame(g));
+		Game out = gameDAO->getGame(g.getId());
+		REQUIRE(out.getId() == g.getId());
+		REQUIRE(out.getTime() == g.getTime());
+		REQUIRE(out.getTeams() == g.getTeams());
+	}
 
 }
 
@@ -213,6 +231,16 @@ TEST_CASE("Team DAO")
 	{
 		multimap<int, long> in = { {1,2}, {1, 23}, {0, 69}, {0, 420}, {4, 10} };
 		teamDAO->addTeams(1, in);
+		multimap<int, long> out = teamDAO->getTeams(1);
+		REQUIRE(in == out);
+	}
+
+	SECTION("Update player")
+	{
+		multimap<int, long> in = { { 1,2 },{ 1, 23 },{ 0, 69 },{ 0, 420 },{ 4, 10 } };
+		teamDAO->addTeams(1, in);
+		in.insert(pair<int, long>(5, 6));
+		REQUIRE(teamDAO->updateTeams(1, in));
 		multimap<int, long> out = teamDAO->getTeams(1);
 		REQUIRE(in == out);
 	}

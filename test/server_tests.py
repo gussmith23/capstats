@@ -47,6 +47,11 @@ class Tests(unittest.TestCase):
       self.assertEqual(post_params[key], json[key])
 
     r = requests.get(game_url + "/" + str(json['id']))
+    json = r.json()
+    for key in post_params.keys():
+      self.assertEqual(post_params[key], json[key])
+    
+    
     
   def test_add_get_update_player(self):
     post_params = {

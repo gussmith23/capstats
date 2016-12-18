@@ -29,6 +29,15 @@ public:
 	*/
 	bool addGame(Game &game) const;
 
+	/**
+	 * Updates game in the database. Note that the update will happen based
+	 * on the id of the Game object, so it must be a valid id.
+	 * \param game the game to update, containing the new data to put in
+	 *		the database.
+	 * \return true if success.
+	 */
+	bool updateGame(const Game& player) const;
+
 private:
 	std::shared_ptr<TeamDAO> teamDAO;
 };

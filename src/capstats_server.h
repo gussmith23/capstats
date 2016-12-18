@@ -66,6 +66,7 @@ public:
 	 */
 	void game_post_json(const std::shared_ptr<restbed::Session> session);
 	void game_get_json(const std::shared_ptr<restbed::Session> session);
+	void game_put_json(const std::shared_ptr<restbed::Session> session);
 
 private:
 	uint16_t port;
@@ -81,5 +82,6 @@ private:
 	Player jsonToPlayer(const JsonBox::Value& json);
 	JsonBox::Value playersToJson(const std::vector<Player>& players);
 	JsonBox::Value gameToJson(const Game& game);
+	Game jsonToGame(const JsonBox::Value& json);
 };
 #endif

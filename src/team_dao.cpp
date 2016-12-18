@@ -67,3 +67,26 @@ multimap<int, long> TeamDAO::getTeams(long gameid)
 		return multimap<int, long>();
 	}
 }
+
+bool TeamDAO::updateTeams(long gameId, std::multimap<int, long> teams)
+{
+	if (!deleteTeams(gameId)) return false;
+	return addTeams(gameId, teams);
+}
+
+bool TeamDAO::deleteTeams(long gameId)
+{
+	try {
+		multimap<int, long> out;
+		otl_stream del(1,
+			"delete from playergame where game_id=:gameId<long>",
+			*db);
+		del << gameId;
+		del.flush();
+		return true;
+	}
+	catch (otl_exception)
+	{
+		return false;
+	}
+}

@@ -32,6 +32,18 @@ public:
 	 *		If no teams were found, the multimap will be empty.
 	 */
 	std::multimap<int, long> getTeams(long gameid);
+
+	/**
+	 * Updates teams in the database.
+	 * \param gameid the id of the game corresponding to the given teams.
+	 * \param teams a multimap which maps a team index in the game to a player on that team.
+	 *		for example, some mappings might be 0 -> 1, 1 -> 3
+	 *		for a 1v1 game between player 1 and player 3.
+	 * \return true for success, false for failure
+	 */
+	bool updateTeams(long gameid, std::multimap<int, long> teams);
+
+	bool deleteTeams(long gameid);
 };
 
 #endif // !TEAM_DAO_H

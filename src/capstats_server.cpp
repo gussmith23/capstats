@@ -272,6 +272,7 @@ int CapstatsServer::run() {
 	auto gameWithId = make_shared<Resource>();
 	gameWithId->set_path("/game/{id: [0-9]+}");
 	gameWithId->set_method_handler("GET", bind1st(mem_fun(&CapstatsServer::game_get_json), this));
+	gameWithId->set_method_handler("PUT", bind1st(mem_fun(&CapstatsServer::game_put_json), this));
 	auto game = make_shared<Resource>();
 	game->set_path("/game");
 	game->set_method_handler("POST", bind1st(mem_fun(&CapstatsServer::game_post_json), this));
@@ -309,6 +310,22 @@ JsonBox::Value CapstatsServer::gameToJson(const Game & game)
 	{
 		out["teams"][to_string(pair.first)] = pair.second;
 	}
+
+	return out;
+}
+
+Game CapstatsServer::jsonToGame(const JsonBox::Value & json)
+{
+	Game out;
+
+	Object obj = json.getObject();
+	out.setId(obj["id"].tryGetInteger(-1));
+	out.setTime(obj["time"].tryGetInteger(0));
+
+	multimap<int, long> teams;
+	for (auto i : obj["teams"].getObject())
+		teams.insert(pair<int, long>(::stoi(i.first), i.second.getInteger()));
+	out.setTeams(teams);
 
 	return out;
 }
@@ -372,4 +389,50 @@ void CapstatsServer::game_get_json(const std::shared_ptr<restbed::Session> sessi
 
 	session->close(OK, ss.str(), { { "Content-Length", ::to_string(ss.str().size()) } });
 
+}
+
+void CapstatsServer::game_put_json(const std::shared_ptr<restbed::Session> session)
+{
+	const auto request = session->get_request();
+
+	int content_length = stoi(request->get_header("Content-Length", "0"));
+
+	long id = ::stol(request->get_path_parameter("id"));
+
+	session->fetch(content_length, [this, id](const shared_ptr< Session > session, const Bytes & body)
+	{
+		try {
+			Value game;
+			game.loadFromString(string(body.begin(), body.end()));
+
+			Game in = jsonToGame(game);
+			in.setId(id);
+			if (!gameDAO->updateGame(in)) {
+				session->close(INTERNAL_SERVER_ERROR);
+				return;
+			}
+
+			Value out = gameToJson(in);
+
+			stringstream ss;
+			out.writeToStream(ss);
+
+			session->close(OK, ss.str(), { { "Content-Length", ::to_string(ss.str().length()) },{ "Content-Type", "application/json" } });
+		}
+		catch (const otl_exception& e) {
+			cerr << e.msg << endl;
+			cerr << e.stm_text << endl;
+			cerr << e.var_info << endl;
+			session->close(INTERNAL_SERVER_ERROR);
+		}
+		catch (const exception& e)
+		{
+			string body;
+			body = "Unexpected exception: \"";
+			body += e.what();
+			body += "\"";
+			cerr << body << endl;
+			session->close(INTERNAL_SERVER_ERROR, body, { { "Content-Length", to_string(body.size()) },{ "Content-type", "text/html" } });
+		}
+	});
 }

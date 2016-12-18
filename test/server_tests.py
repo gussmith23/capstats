@@ -21,19 +21,23 @@ def startServer():
   
 class Tests(unittest.TestCase):  
     
-  def setUp(self):
-    self.p = subprocess.Popen(server_path)
+  # comment these out when you want to debug the server. start the server (using 
+  # visual studio for example) and then run the tests.
+  # some tests will only work with this stuff uncommented OR if you restart the
+  # server each time you run the tests.
+  # def setUp(self):
+    # self.p = subprocess.Popen(server_path)
     
-  def tearDown(self):
-    os.kill(self.p.pid, signal.SIGTERM) 
+  # def tearDown(self):
+    # os.kill(self.p.pid, signal.SIGTERM) 
 
-  def test_add_get_game(self):
+  def test_add_get_update_game(self):
     post_params = {
       'teams': {
         '1' : [1,2,3],
         '2' : [4,5,6]
       },
-      'scores': {
+      'points': {
         '1' : 11,
         '2' : 9
       }
@@ -51,7 +55,15 @@ class Tests(unittest.TestCase):
     for key in post_params.keys():
       self.assertEqual(post_params[key], json[key])
     
+    post_params['teams']['3'] = [7,8,9]
+    post_params['points']['3'] = 6
     
+    r = requests.put(game_url + "/" + str(json['id']), json = post_params)
+
+    r = requests.get(game_url + "/" + str(json['id']))
+    json = r.json()
+    for key in post_params.keys():
+      self.assertEqual(post_params[key], json[key])
     
   def test_add_get_update_player(self):
     post_params = {

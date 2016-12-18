@@ -18,8 +18,9 @@ public:
 		port(port),
 		db(std::shared_ptr<otl_connect>(new otl_connect)),
 		teamDAO(std::shared_ptr<TeamDAO>(new TeamDAO(db))),
+		pointsDAO(std::shared_ptr<PointsDAO>(new PointsDAO(db))),
 		playerDAO(std::shared_ptr<PlayerDAO>(new PlayerDAO(db))),
-		gameDAO(std::shared_ptr<GameDAO>(new GameDAO(db, teamDAO))) {};
+		gameDAO(std::shared_ptr<GameDAO>(new GameDAO(db, teamDAO, pointsDAO))) {};
 
 	void init();
 	int run();
@@ -76,6 +77,7 @@ private:
 	
 	std::shared_ptr<PlayerDAO> playerDAO;
 	std::shared_ptr<TeamDAO> teamDAO;
+	std::shared_ptr<PointsDAO> pointsDAO;
 	std::shared_ptr<GameDAO> gameDAO;
 
 	JsonBox::Value playerToJson(const Player& player);

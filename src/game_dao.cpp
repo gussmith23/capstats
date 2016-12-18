@@ -5,6 +5,7 @@
 #include "include_otl.h"
 #include "capstats_exceptions.h"
 #include "team_dao.h"
+#include "points_dao.h"
 
 using namespace std;
 
@@ -25,11 +26,13 @@ Game GameDAO::getGame(long gameId) const
 	else return Game(-1);
 
 	multimap<int, long> teams = teamDAO->getTeams(gameId);
+	multimap<int, int> points = pointsDAO->getPoints(gameId);
 
 	Game out; 
 	out.setId(gameId);
 	out.setTime(timestamp);
 	out.setTeams(teams);
+	out.setPoints(points);
 
 	return out;
 }
@@ -55,12 +58,16 @@ bool GameDAO::addGame(Game &game) const
 	// Now that we've got the gameid, add the teams...
 	if (teamDAO->addTeams(game.getId(), game.getTeams()) == false) return false;
 
+	// and then the points...
+	if (pointsDAO->addPoints(game.getId(), game.getPoints()) == false) return false;
+
 	return true;
 }
 
 bool GameDAO::updateGame(const Game & game) const
 {
 	if (!teamDAO->updateTeams(game.getId(), game.getTeams())) return false;
+	if (!pointsDAO->updatePoints(game.getId(), game.getPoints())) return false;
 	
 	try {
 		otl_stream update(1,

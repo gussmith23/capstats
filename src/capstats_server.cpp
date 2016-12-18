@@ -248,6 +248,7 @@ void CapstatsServer::init() {
 		playerDAO->init();
 		gameDAO->init();
 		teamDAO->init();
+		pointsDAO->init();
 	}
 
 	catch (otl_exception& p) { // intercept OTL exceptions
@@ -311,6 +312,9 @@ JsonBox::Value CapstatsServer::gameToJson(const Game & game)
 		out["teams"][to_string(pair.first)] = pair.second;
 	}
 
+	for (const auto& pair : game.getPoints())
+		out["points"][::to_string(pair.first)] = pair.second;
+
 	return out;
 }
 
@@ -324,8 +328,14 @@ Game CapstatsServer::jsonToGame(const JsonBox::Value & json)
 
 	multimap<int, long> teams;
 	for (auto i : obj["teams"].getObject())
-		teams.insert(pair<int, long>(::stoi(i.first), i.second.getInteger()));
+		for (auto j : i.second.getArray())
+			teams.insert(pair<int, long>(::stoi(i.first), j.getInteger()));
 	out.setTeams(teams);
+
+	multimap<int, int> points;
+	for (auto i : obj["points"].getObject())
+		points.insert(pair<int, int>(::stoi(i.first), i.second.getInteger()));
+	out.setPoints(points);
 
 	return out;
 }
@@ -341,26 +351,7 @@ void CapstatsServer::game_post_json(const std::shared_ptr<restbed::Session> sess
 		Value game;
 		game.loadFromString(string(body.begin(), body.end()));
 		
-		multimap<int, long> teams;
-		for (const auto& x : game["teams"].getObject())
-		{
-			int team = stoi(x.first);
-			for (const auto& playerId : x.second.getArray())
-				teams.insert(pair<int, long>(team, playerId.getInteger()));
-		}
-
-		map<int, int> scores;
-		for (const auto& scorePair : game["score"].getObject())
-		{
-			int team = stoi(scorePair.first);
-			scores.insert(pair<int, int>(team, scorePair.second.getInteger()));
-		}
-
-		time_t time = game["time"].getInteger();
-
-		Game out;
-		out.setTeams(teams);
-		out.setTime(time);
+		Game out = jsonToGame(game);
 
 		gameDAO->addGame(out);
 

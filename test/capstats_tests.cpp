@@ -159,7 +159,9 @@ TEST_CASE("Game DAO") {
 
 	shared_ptr<TeamDAO> teamDAO(new TeamDAO(db));
 	teamDAO->init();
-	shared_ptr<GameDAO> gameDAO(new GameDAO(db, teamDAO));
+	shared_ptr<PointsDAO> pointsDAO(new PointsDAO(db));
+	pointsDAO->init();
+	shared_ptr<GameDAO> gameDAO(new GameDAO(db, teamDAO, pointsDAO));
 	gameDAO->init();
 
 	SECTION("Games added to and retrieved from database") {
@@ -169,6 +171,8 @@ TEST_CASE("Game DAO") {
 			long idBeforeAdd = g.getId();
 			multimap<int, long> teams = { {1,2}, {3,4}, {3,5}, {6,7} };
 			g.setTeams(teams);
+			multimap<int, int> points = { {1,9}, {3, 11}, {200, 20000} };
+			g.setPoints(points);
 
 			REQUIRE(gameDAO->addGame(g) == true);
 			REQUIRE(g.getId() != idBeforeAdd);
@@ -176,6 +180,7 @@ TEST_CASE("Game DAO") {
 			Game out = gameDAO->getGame(g.getId());
 			REQUIRE(out.getTime() == 23);
 			REQUIRE(out.getTeams() == teams);
+			REQUIRE(out.getPoints() == points);
 		}
 		catch (otl_exception e) {
 			cout << e.msg << endl;
@@ -204,17 +209,21 @@ TEST_CASE("Game DAO") {
 		long idBeforeAdd = g.getId();
 		multimap<int, long> teams = { { 1,2 },{ 3,4 },{ 3,5 },{ 6,7 } };
 		g.setTeams(teams);
+		multimap<int, int> points = { { 1,9 },{ 3, 11 },{ 200, 20000 } };
+		g.setPoints(points);
 		gameDAO->addGame(g);
 
 		teams.insert(pair<int, long>(8, 9));
 		g.setTeams(teams);
 		g.setTime(24);
+		points.insert(pair<int, int>(10, 11));
 		
 		REQUIRE(gameDAO->updateGame(g));
 		Game out = gameDAO->getGame(g.getId());
 		REQUIRE(out.getId() == g.getId());
 		REQUIRE(out.getTime() == g.getTime());
 		REQUIRE(out.getTeams() == g.getTeams());
+		REQUIRE(out.getPoints() == g.getPoints());
 	}
 
 }

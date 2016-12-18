@@ -7,7 +7,7 @@
 
 class Game {
 public:
-	inline Game() : id(-1), time(0), teams(std::multimap<int, long>()) {};
+	inline Game() : id(-1), time(0), teams(std::multimap<int, long>()), points(std::multimap<int, int>()) {};
 	inline Game(long id) : Game() { Game::id = id; }
 
 	inline void setTime(std::time_t time) { Game::time = time; }
@@ -16,12 +16,16 @@ public:
 	inline void setTeams(const std::multimap<int, long> &teams) { Game::teams = teams; }
 	inline std::multimap<int, long> getTeams() const { return teams; }
 
+	inline void setPoints(const std::multimap<int, int> &points) { Game::points = points; }
+	inline std::multimap<int, int> getPoints() const { return points; }
+
 	inline void setId(long id) { Game::id = id; }
 	inline long getId() const { return id; }
 
 private:
 	std::time_t time;
 	std::multimap<int, long> teams;
+	std::multimap<int, int> points;
 	long id;
 };
 

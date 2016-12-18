@@ -30,7 +30,8 @@ public:
 	 * The format of the player should be:
 	 *	{
 	 *		'name' : name,
-	 *		'telegramId' : telegramId
+	 *		'telegramId' : telegramId,
+	 *		'telegramUsername' : telegramUsername
 	 *	}
 	 */
 	void player_post_json(const std::shared_ptr<restbed::Session> session);

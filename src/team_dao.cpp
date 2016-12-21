@@ -26,7 +26,7 @@ void TeamDAO::init() {
 bool TeamDAO::addTeams(long gameid, multimap<int, long> teams)
 {
 	try {
-		otl_stream o(50,
+	  otl_stream o(1,
 			"insert into playergame (game_id, player_id, team) values (:game_id<long>, :player_id<long>, :team<int>)",
 			*db);
 
@@ -35,12 +35,13 @@ bool TeamDAO::addTeams(long gameid, multimap<int, long> teams)
 			o << gameid << it->second << it->first;
 		}
 
-		o.flush();
+		// o.flush();
 
 		return true;
 	} 
-	catch (otl_exception)
+	catch (otl_exception e)
 	{
+	  cerr << e.stm_text << endl << e.var_info << endl;
 		return false;
 	}
 }
@@ -49,7 +50,7 @@ multimap<int, long> TeamDAO::getTeams(long gameid)
 {
 	try {
 		multimap<int, long> out;
-		otl_stream select(50,
+		otl_stream select(1,
 			"select player_id, team from playergame where game_id=:game_id<long>",
 			*db);
 		select << gameid;
@@ -62,7 +63,7 @@ multimap<int, long> TeamDAO::getTeams(long gameid)
 		}
 		return out;
 	}
-	catch (otl_exception)
+	catch (otl_exception e)
 	{
 		return multimap<int, long>();
 	}

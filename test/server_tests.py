@@ -7,29 +7,27 @@ import time
 import os
 import signal
 
-
 player_url = 'http://localhost:23232/player'
 game_url =  'http://localhost:23232/game'
 
 server_path = ""
 if (os.name == "nt"): server_path = r'..\build\Debug\capstats_server.exe'
-elif (os.name == "posix"): server_path = "" #todo: what should this be?
-
-def startServer():
-  subprocess.call([server_path])
-    
-  
+elif (os.name == "posix"): server_path = r"../build/capstats_server" #todo: what should this be?
+ 
 class Tests(unittest.TestCase):  
     
   # comment these out when you want to debug the server. start the server (using 
   # visual studio for example) and then run the tests.
   # some tests will only work with this stuff uncommented OR if you restart the
   # server each time you run the tests.
-  # def setUp(self):
-    # self.p = subprocess.Popen(server_path)
+  def setUp(self):
+    self.p = subprocess.Popen(server_path)
+    time.sleep(.01)
     
-  # def tearDown(self):
-    # os.kill(self.p.pid, signal.SIGTERM) 
+  def tearDown(self):
+    self.p.terminate()
+    self.p.wait()
+    self.p = None
 
   def test_add_get_update_game(self):
     post_params = {
@@ -103,7 +101,7 @@ class Tests(unittest.TestCase):
     
   # tests uri /player WITHOUT giving an id. tests /player, /player?param=val,
   # etc.
-  def test_get_player_no_id(self):    
+  def test_get_player_no_id(self):
     players =[ {
       'name' : 'gus',
       'telegramId' : 1
@@ -121,7 +119,7 @@ class Tests(unittest.TestCase):
     self.assertTrue(len(r.json()) == 3)
 
     r = requests.get(player_url, params={'name':'gus'})
-    json = r.json()
+    json = r.json();
     self.assertTrue(len(json) == 2)
     
     r = requests.get(player_url, params={'name':'henry'})

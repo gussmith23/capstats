@@ -20,7 +20,7 @@ void PointsDAO::init() {
 bool PointsDAO::addPoints(long gameid, multimap<int, int> points)
 {
 	try {
-		otl_stream o(50,
+	  otl_stream o(1,
 			"insert into points (game_id, team, points) values (:game_id<long>, :team<int>, :points<int>)",
 			*db);
 
@@ -43,7 +43,7 @@ multimap<int, int> PointsDAO::getPoints(long gameid)
 {
 	try {
 		multimap<int, int> out;
-		otl_stream select(50,
+		otl_stream select(1,
 			"select team, points from points where game_id=:game_id<long>",
 			*db);
 		select << gameid;

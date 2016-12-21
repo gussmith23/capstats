@@ -4,7 +4,6 @@
 
 #include <memory>
 #include <cstdlib>
-#include <restbed>
 
 #include <sql.h>
 #include <sqltypes.h>
@@ -33,7 +32,7 @@ void CapstatsServer::player_post_json( const shared_ptr< Session > session )
 {
     const auto request = session->get_request( );
 
-    int content_length = stoi(request->get_header( "Content-Length", "0"));
+    int content_length = request->get_header( "Content-Length", 0);
 
     session->fetch( content_length, [this]( const shared_ptr< Session > session, const Bytes & body )
     {
@@ -168,7 +167,7 @@ void CapstatsServer::player_put_json(const std::shared_ptr<restbed::Session> ses
 {
 	const auto request = session->get_request();
 
-	int content_length = stoi(request->get_header("Content-Length", "0"));
+	int content_length = request->get_header("Content-Length", 0);
 
 	long id = ::stol(request->get_path_parameter("id"));
 
@@ -213,9 +212,9 @@ void CapstatsServer::player_put_json(const std::shared_ptr<restbed::Session> ses
 JsonBox::Value CapstatsServer::playerToJson(const Player & player)
 {
 	JsonBox::Value out;
-	out["id"] = player.getId();
+	out["id"] = static_cast<int>(player.getId());
 	out["name"] = player.getName();
-	out["telegramId"] = player.getTelegramId();
+	out["telegramId"] = static_cast<int>(player.getTelegramId());
 	out["telegramUsername"] = player.getTelegramUsername();
 	return out;
 }
@@ -302,7 +301,7 @@ int CapstatsServer::run() {
 JsonBox::Value CapstatsServer::gameToJson(const Game & game)
 {
 	Value out;
-	out["id"] = game.getId();
+	out["id"] = static_cast<int>(game.getId());
 	out["time"] = (int) game.getTime();
 	
 	map<int, Array> teams;
@@ -310,7 +309,7 @@ JsonBox::Value CapstatsServer::gameToJson(const Game & game)
 	{
 		if (teams.find(pair.first) == teams.end())
 			teams[pair.first] = Array();
-		teams[pair.first].push_back(Value(pair.second));
+		teams[pair.first].push_back(Value(static_cast<int>(pair.second)));
 	}
 	for (const auto& pair : teams)
 	{
@@ -349,7 +348,7 @@ void CapstatsServer::game_post_json(const std::shared_ptr<restbed::Session> sess
 {
 	const auto request = session->get_request();
 
-	int content_length = stoi(request->get_header("Content-Length", "0"));
+	int content_length = request->get_header("Content-Length", 0);
 
 	session->fetch(content_length, [this](const shared_ptr< Session > session, const Bytes & body)
 	{
@@ -360,7 +359,7 @@ void CapstatsServer::game_post_json(const std::shared_ptr<restbed::Session> sess
 
 		gameDAO->addGame(out);
 
-		game["id"] = out.getId();
+		game["id"] = static_cast<int>(out.getId());
 
 		stringstream ss;
 		game.writeToStream(ss);
@@ -397,7 +396,7 @@ void CapstatsServer::game_put_json(const std::shared_ptr<restbed::Session> sessi
 {
 	const auto request = session->get_request();
 
-	int content_length = stoi(request->get_header("Content-Length", "0"));
+	int content_length = request->get_header("Content-Length", 0);
 
 	long id = ::stol(request->get_path_parameter("id"));
 

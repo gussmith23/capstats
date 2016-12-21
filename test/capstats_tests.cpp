@@ -16,6 +16,27 @@
 
 using namespace std;
 
+// TODO: When porting to linux from windows, there was a bug where, if the
+// buffer of the otl stream objects was >1, things would be put in the
+// database in weird ways (i.e. insert streams that inserted multimple
+// rows would have rows all messed up, columns would be switched, etc).
+// i fixed it by making the buffer 1 for all of them, but it's not a satisfying
+// fix.
+
+// from http://stackoverflow.com/questions/440133/how-do-i-create-a-random-alpha-numeric-string-in-c
+void gen_random(char *s, const int len) {
+    static const char alphanum[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+
+    for (int i = 0; i < len; ++i) {
+        s[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
+    }
+
+    s[len] = 0;
+}
+
 TEST_CASE("Player DAO") {
 	otl_connect::otl_initialize();
 	shared_ptr<otl_connect> db = shared_ptr<otl_connect>(new otl_connect);
@@ -232,7 +253,7 @@ TEST_CASE("Team DAO")
 {
 	otl_connect::otl_initialize();
 	shared_ptr<otl_connect> db(new otl_connect);
-	*db << "DRIVER=SQLite3 ODBC Driver;Database=:memory:;";
+	*db << "DRIVER=SQLite3 ODBC Driver;Database=:memory:";
 
 	shared_ptr<TeamDAO> teamDAO(new TeamDAO(db));
 	teamDAO->init();
@@ -254,6 +275,15 @@ TEST_CASE("Team DAO")
 		multimap<int, long> out = teamDAO->getTeams(1);
 		REQUIRE(in == out);
 	}
+
+	SECTION("Delete team")
+	  {
+	    multimap<int, long> in = { {1,2} };
+	    REQUIRE(teamDAO->getTeams(1).size() == 0);
+	    teamDAO->addTeams(1, in);
+	    REQUIRE(teamDAO->deleteTeams(1));
+	    REQUIRE(teamDAO->getTeams(1).size() == 0);
+	  }
 }
 
 TEST_CASE("Points DAO")

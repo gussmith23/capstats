@@ -212,10 +212,22 @@ void CapstatsServer::player_put_json(const std::shared_ptr<restbed::Session> ses
 JsonBox::Value CapstatsServer::playerToJson(const Player & player)
 {
 	JsonBox::Value out;
-	out["id"] = static_cast<int>(player.getId());
-	out["name"] = player.getName();
-	out["telegramId"] = static_cast<int>(player.getTelegramId());
-	out["telegramUsername"] = player.getTelegramUsername();
+        int id = static_cast<int>(player.getId());
+        if (id >= 0) out["id"] = id;
+        else out["id"] = Value();
+
+        string name = player.getName();
+        if (name.size() > 0) out["name"] = name;
+        else out["name"] = Value();
+
+        int telegramId = static_cast<int>(player.getTelegramId());
+        if (telegramId >= 0) out["telegramId"] = telegramId;
+        else out["telegramId"] = Value();
+
+        string telegramUsername = player.getTelegramUsername();
+        if (telegramUsername.size() > 0) out["telegramUsername"] = telegramUsername;
+        else out["telegramUsername"] = Value();
+
 	return out;
 }
 

@@ -41,6 +41,15 @@ void CapstatsServer::player_post_json( const shared_ptr< Session > session )
       player.loadFromString(string(body.begin(), body.end()));
 
       Player in = jsonToPlayer(player);
+      bool playerHasContent = in.getTelegramId() != -1 || in.getName() != "" 
+          || in.getTelegramUsername() != "";
+        
+      if (!playerHasContent) 
+      {
+        session->close(FORBIDDEN);
+        return;
+      }
+
       if (!playerDAO->addPlayer(in)) {
       session->close(INTERNAL_SERVER_ERROR);
       return;
@@ -293,6 +302,7 @@ int CapstatsServer::run() {
   auto game = make_shared<Resource>();
   game->set_path("/game");
   game->set_method_handler("POST", bind1st(mem_fun(&CapstatsServer::game_post_json), this));
+  game->set_method_handler("GET", bind1st(mem_fun(&CapstatsServer::gameWithoutId_get_json), this));
 
 
 
@@ -332,6 +342,13 @@ JsonBox::Value CapstatsServer::gameToJson(const Game & game)
     out["points"][::to_string(pair.first)] = pair.second;
 
   return out;
+}
+
+JsonBox::Value CapstatsServer::gamesToJson(const std::vector<Game>& games)
+{
+  Array out;
+  for (Game game : games) out.push_back(gameToJson(game));
+  return Value(out);
 }
 
 Game CapstatsServer::jsonToGame(const JsonBox::Value & json)
@@ -404,6 +421,50 @@ void CapstatsServer::game_get_json(const std::shared_ptr<restbed::Session> sessi
 
 }
 
+void CapstatsServer::gameWithoutId_get_json(const std::shared_ptr<restbed::Session> session)
+{
+  try
+  {
+    const auto request = session->get_request();
+
+    /* get query parameters. 
+    string telegramUsername = request->get_query_parameter("telegramUsername");
+    string name = request->get_query_parameter("name");
+    long telegramId = -1;
+    string telegramId_string = request->get_query_parameter("telegramId");
+    if (telegramId_string != "") telegramId = ::stol(telegramId_string);
+    */
+
+    vector<Game> games = gameDAO->findGames(-1);
+
+    Value gamesJson = gamesToJson(games);
+
+    stringstream ss;
+    gamesJson.writeToStream(ss);
+    string response_body = ss.str();
+
+    session->close(OK, response_body,
+        { { "Content-Length", to_string(response_body.length()) },
+        { "Content-Type", "application/json" } });
+  }
+  catch (const otl_exception& e)
+  {
+    cerr << e.msg << endl;
+    cerr << e.stm_text << endl;
+    cerr << e.var_info << endl;
+    session->close(INTERNAL_SERVER_ERROR);
+  }
+  catch (const exception& e)
+  {
+    string body;
+    body = "Unexpected exception: \"";
+    body += e.what();
+    body += "\"";
+    cerr << body << endl;
+    session->close(INTERNAL_SERVER_ERROR, body, { { "Content-Length", to_string(body.size()) },{ "Content-type", "text/html" } });
+  }
+  session->close(NOT_IMPLEMENTED);
+}
 void CapstatsServer::game_put_json(const std::shared_ptr<restbed::Session> session)
 {
   const auto request = session->get_request();

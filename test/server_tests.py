@@ -133,7 +133,29 @@ class Tests(unittest.TestCase):
     r = requests.get(player_url, params={'name':'gus', 'telegramId' : 2})
     json = r.json()
     self.assertTrue(len(json) == 0)
-
-    
-
  
+  def test_find_game(self):
+    r = requests.get(game_url)
+    json = r.json()
+    self.assertEqual(len(json), 0)
+
+    post_params = {
+      'teams': {
+        '1' : [1,2,3],
+        '2' : [4,5,6]
+      },
+      'points': {
+        '1' : 11,
+        '2' : 9
+      }
+    }
+    r = requests.post(game_url, json = post_params)
+
+    post_params['teams']['3'] = [7,8]
+    post_params['points']['3'] = [2]
+    r = requests.post(game_url, json = post_params)
+
+    r = requests.get(game_url)
+    json = r.json()
+
+    self.assertEqual(len(json), 2)

@@ -247,6 +247,41 @@ TEST_CASE("Game DAO") {
     REQUIRE(out.getPoints() == g.getPoints());
   }
 
+  SECTION("find games, games present") {
+    Game g;
+    g.setTime(23);
+    multimap<int, long> teams = { { 1,2 },{ 3,4 },{ 3,5 },{ 6,7 } };
+    g.setTeams(teams);
+    multimap<int, int> points = { { 1,9 },{ 3, 11 },{ 200, 20000 } };
+    g.setPoints(points);
+    gameDAO->addGame(g);
+    g.setTime(24);
+    g.setId(-1);
+    gameDAO->addGame(g);
+
+    REQUIRE(gameDAO->findGames().size() == 2);
+  }
+
+
+  SECTION("find games using id") {
+    Game g;
+    g.setTime(23);
+    multimap<int, long> teams = { { 1,2 },{ 3,4 },{ 3,5 },{ 6,7 } };
+    g.setTeams(teams);
+    multimap<int, int> points = { { 1,9 },{ 3, 11 },{ 200, 20000 } };
+    g.setPoints(points);
+    gameDAO->addGame(g);
+    long id = g.getId();
+    g.setId(-1);
+    gameDAO->addGame(g);
+
+    REQUIRE(gameDAO->findGames(id).size() == 1);
+  }
+
+  SECTION("find games, no games present") {
+    REQUIRE(gameDAO->findGames().size() == 0);
+  }
+
 }
 
 TEST_CASE("Team DAO")

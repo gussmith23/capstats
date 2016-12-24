@@ -84,3 +84,39 @@ bool GameDAO::updateGame(const Game & game) const
 		return false;
 	}
 }
+
+std::vector<Game> GameDAO::findGames(long id) const
+{
+  stringstream selectStringBase;
+  selectStringBase << "select rowid ";
+  selectStringBase << "from games ";
+
+  vector<string> whereClauses;
+  if (id >=0) whereClauses.push_back("rowid=:rowid<long>");
+
+  stringstream whereClauseString;
+  if (whereClauses.size() > 0) 
+  {
+    whereClauseString << "where ";
+    std::copy(whereClauses.begin(), whereClauses.end() - 1, ostream_iterator<string>(whereClauseString, " AND "));
+    whereClauseString << whereClauses.back();
+  }
+
+  string selectString = selectStringBase.str() + whereClauseString.str();
+  otl_stream select(50,
+      selectString.c_str(),
+      *db);
+
+  if (id >= 0) select << id;
+
+  vector<Game> out;
+  while (!select.eof()) 
+  {
+    long id; 
+    select >> id;
+    out.push_back(getGame(id));
+  }
+
+  return out;
+
+}

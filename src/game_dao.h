@@ -39,6 +39,11 @@ class GameDAO : DAO {
      */
     bool updateGame(const Game& player) const;
 
+    /**
+     * Find a game with the given fields.
+     */
+    std::vector<Game> findGames(long id = -1) const;
+
   private:
     std::shared_ptr<TeamDAO> teamDAO;
     std::shared_ptr<PointsDAO> pointsDAO;

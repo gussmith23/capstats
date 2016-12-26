@@ -6,6 +6,7 @@
 #include "team_dao.h"
 #include "points_dao.h"
 #include <memory>
+#include <vector>
 
 class GameDAO : DAO {
   public:
@@ -42,7 +43,7 @@ class GameDAO : DAO {
     /**
      * Find a game with the given fields.
      */
-    std::vector<Game> findGames(long id = -1) const;
+    std::vector<Game> findGames(long id = -1, std::vector<long> playerIds = {}) const;
 
   private:
     std::shared_ptr<TeamDAO> teamDAO;

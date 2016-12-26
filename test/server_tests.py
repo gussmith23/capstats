@@ -159,3 +159,36 @@ class Tests(unittest.TestCase):
     json = r.json()
 
     self.assertEqual(len(json), 2)
+
+    
+  def test_find_game_with_players(self):
+    post_params = {
+      'teams': {
+        '1' : [1,2,3],
+        '2' : [4,5,6]
+      },
+      'points': {
+        '1' : 11,
+        '2' : 9
+      }
+    }
+    r = requests.post(game_url, json = post_params)
+
+    post_params['teams']['3'] = [7,8]
+    post_params['points']['3'] = [2]
+    r = requests.post(game_url, json = post_params)
+
+    r = requests.get(game_url, params={'players': 1})
+    json = r.json()
+
+    self.assertEqual(len(json), 2)
+
+    r = requests.get(game_url, params={'players': 7})
+    json = r.json()
+
+    self.assertEqual(len(json), 1)
+
+    r = requests.get(game_url, params={'players': 10})
+    json = r.json()
+
+    self.assertEqual(len(json), 0)

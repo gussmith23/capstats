@@ -435,7 +435,19 @@ void CapstatsServer::gameWithoutId_get_json(const std::shared_ptr<restbed::Sessi
     if (telegramId_string != "") telegramId = ::stol(telegramId_string);
     */
 
-    vector<Game> games = gameDAO->findGames(-1);
+    string players = request->get_query_parameter("players");
+    istringstream iss(players);
+    string token;
+    vector<long> playerIds;
+    while (getline(iss,token, ',')) {
+      try {
+        long id = stol(token);
+        playerIds.push_back(id);
+      }
+      catch (invalid_argument) {}
+    }
+
+    vector<Game> games = gameDAO->findGames(-1, playerIds);
 
     Value gamesJson = gamesToJson(games);
 

@@ -13,6 +13,7 @@
 #include <mutex>
 #include <memory>
 #include <map>
+#include <set>
 
 using namespace std;
 
@@ -318,6 +319,19 @@ TEST_CASE("Team DAO")
     teamDAO->addTeams(1, in);
     REQUIRE(teamDAO->deleteTeams(1));
     REQUIRE(teamDAO->getTeams(1).size() == 0);
+  }
+
+  SECTION("Get gameids by players.")
+  {
+    multimap<int, long> in = { { 1,2 },{ 1, 23 },{ 0, 69 },{ 0, 420 },{ 4, 10 } };
+    teamDAO->addTeams(1, in);
+    in = { { 1,69 },{ 1, 23 },{ 0, 10 } };
+    teamDAO->addTeams(2, in);
+    in = { { 1,420 },{ 1, 23 },{ 0, 10 } };
+    teamDAO->addTeams(3, in);
+
+    set<long> gameIds = teamDAO->getGameIdsOfGamesWithPlayers({69, 420});
+    REQUIRE(gameIds.size() == 1);
   }
 }
 

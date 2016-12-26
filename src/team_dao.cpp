@@ -1,9 +1,8 @@
 #include "team_dao.h"
 
 #include <mutex>
-
+                
 #include "include_otl.h"
-
 
 using namespace std;
 
@@ -90,4 +89,51 @@ bool TeamDAO::deleteTeams(long gameId)
 	{
 		return false;
 	}
+}
+
+set<long> TeamDAO::getGameIdsOfGamesWithPlayers(vector<long> playerIds)
+{
+  if (playerIds.size() <= 0) return set<long>(); 
+  
+  try {
+    stringstream selectStringBase;
+    selectStringBase << "select * from (";
+
+    int i = 0;
+    vector<string> selectStatements;
+    for (long id : playerIds)
+    {
+      stringstream selectStatement;
+      selectStatement << "(select game_id from playergame "
+          << "where player_id = :player" << i << "id<long>) "
+          << "t" << i << " ";
+      if (i != 0)
+        selectStatement << "on t" << i-1 << ".game_id = t" << i << ".game_id ";
+      selectStatements.push_back(selectStatement.str());
+      i++;
+    }
+
+    copy(selectStatements.begin(), selectStatements.end() - 1, ostream_iterator<string>(selectStringBase, " inner join "));
+    selectStringBase << selectStatements.back();
+    selectStringBase << ")";
+
+    otl_stream select(50,
+        selectStringBase.str().c_str(),
+        *db);
+
+    for (long id : playerIds) select << id;
+
+    set<long> out;
+    while (!select.eof()) {
+      long id;
+      select >> id;
+      out.insert(id);
+    }
+
+    return out;
+  } 
+  catch (otl_exception e)
+  {
+    return set<long>();
+  }
 }

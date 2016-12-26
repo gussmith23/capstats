@@ -3,6 +3,8 @@
 
 #include <map>
 #include <memory>
+#include <set>
+#include <vector>
 
 #include "dao.h"
 #include "player.h"
@@ -44,6 +46,13 @@ public:
 	bool updateTeams(long gameid, std::multimap<int, long> teams);
 
 	bool deleteTeams(long gameid);
+
+        /**
+         * Gets the ids of games in which all of the given players played.
+         * \param
+         * \return a list of gameids.
+         */
+        std::set<long> getGameIdsOfGamesWithPlayers(std::vector<long> playerIds);
 };
 
 #endif // !TEAM_DAO_H

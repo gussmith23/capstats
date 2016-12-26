@@ -1,5 +1,6 @@
 #include <ctime>
 #include <map>
+#include <set>
 #include "game_dao.h"
 #include "game.h"
 #include "include_otl.h"
@@ -85,14 +86,34 @@ bool GameDAO::updateGame(const Game & game) const
 	}
 }
 
-std::vector<Game> GameDAO::findGames(long id) const
+std::vector<Game> GameDAO::findGames(long id, vector<long> playerIds) const
 {
+
+
   stringstream selectStringBase;
   selectStringBase << "select rowid ";
   selectStringBase << "from games ";
 
   vector<string> whereClauses;
   if (id >=0) whereClauses.push_back("rowid=:rowid<long>");
+
+  // gameid where clause
+  if (playerIds.size() > 0) 
+  {
+    // If a list of playerids is given, then first get a list of possible gameids.
+    // I.e. the gameids of games involving all of the players in the list.
+    set<long> possibleGameIdsSet = teamDAO->getGameIdsOfGamesWithPlayers(playerIds);
+    vector<long> possibleGameIds(possibleGameIdsSet.begin(), possibleGameIdsSet.end());
+    
+    // If there are no games with these players, we can return early.
+    if (possibleGameIds.size() <= 0) return vector<Game>();
+
+    stringstream gameIdSs;
+    gameIdSs << "rowid in (";
+    copy(possibleGameIds.begin(), possibleGameIds.end()-1, ostream_iterator<long>(gameIdSs, ", "));
+    gameIdSs << possibleGameIds.back() << ")";
+    whereClauses.push_back(gameIdSs.str());
+  }
 
   stringstream whereClauseString;
   if (whereClauses.size() > 0) 
@@ -102,21 +123,27 @@ std::vector<Game> GameDAO::findGames(long id) const
     whereClauseString << whereClauses.back();
   }
 
-  string selectString = selectStringBase.str() + whereClauseString.str();
-  otl_stream select(50,
-      selectString.c_str(),
-      *db);
+  try {
+    string selectString = selectStringBase.str() + whereClauseString.str();
+    otl_stream select(50,
+        selectString.c_str(),
+        *db);
 
-  if (id >= 0) select << id;
+    if (id >= 0) select << id;
 
-  vector<Game> out;
-  while (!select.eof()) 
-  {
-    long id; 
-    select >> id;
-    out.push_back(getGame(id));
+    vector<Game> out;
+    while (!select.eof()) 
+    {
+      long id; 
+      select >> id;
+      out.push_back(getGame(id));
+    }
+
+    return out;
   }
-
-  return out;
+  catch (otl_exception e)
+  {
+    return vector<Game>();
+  }
 
 }

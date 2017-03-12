@@ -50,3 +50,4 @@ target_link_libraries(capstats_tests Threads::Threads)
 
 enable_testing()
 add_test(NAME capstats_tests COMMAND capstats_tests)
+add_test(NAME server_tests WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/test" COMMAND python -m unittest server_tests)

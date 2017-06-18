@@ -10,7 +10,6 @@
 #include "capstats_exceptions.h"
 #include <iostream>
 #include <string>
-#include <mutex>
 #include <memory>
 #include <map>
 #include <set>

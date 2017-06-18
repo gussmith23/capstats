@@ -1,22 +1,24 @@
 cmake_minimum_required(VERSION 3.6)
 
 project(capstats)
-file(GLOB CAPSTATS_SOURCES "src/*.cpp")
-add_executable(capstats_server "${CAPSTATS_SOURCES}")
-
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+add_executable(capstats_server 
+		"src/game.cpp"
+		"src/game_dao.cpp"
+		"src/player.cpp"
+		"src/player_dao.cpp"
+		"src/points_dao.cpp"
+		"src/team_dao.cpp"
+		"src/capstats_server.cpp"
+		"src/main.cpp")
 
 include_directories("${CMAKE_SOURCE_DIR}/src")
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 # restbed
 find_package(restbed REQUIRED)
 include_directories(${restbed_INCLUDE})
 target_link_libraries(capstats_server ${restbed_LIBRARY})
-add_dependencies(capstats_server restbed)
-#add_library(restbed_lib STATIC IMPORTED)
-# find_package adds external restbed project - now we make sure it builds
-#add_dependencies(restbed_lib restbed) 
-#target_link_libraries
 
 # otl
 include_directories("${CMAKE_SOURCE_DIR}/dependency/otl")

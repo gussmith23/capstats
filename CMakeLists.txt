@@ -11,6 +11,13 @@ add_executable(capstats_server
 		"src/capstats_server.cpp"
 		"src/main.cpp")
 
+# make sure we get the right C++ version
+# TODO(gus) the first line shouldn't be needed, but is. fix it
+set(CMAKE_CXX_FLAGS "-std=c++11")
+set_property(GLOBAL PROPERTY CMAKE_CXX_STANDARD 11)
+set_property(GLOBAL PROPERTY CMAKE_CXX_STANDARD_REQUIRED ON)
+set_property(GLOBAL PROPERTY CMAKE_CXX_EXTENSIONS OFF)
+
 include_directories("${CMAKE_SOURCE_DIR}/src")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")

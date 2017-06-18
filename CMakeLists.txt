@@ -26,6 +26,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 find_package(restbed REQUIRED)
 include_directories(${restbed_INCLUDE})
 target_link_libraries(capstats_server ${restbed_LIBRARY})
+add_dependencies(capstats_server restbed)
+#add_library(restbed_lib STATIC IMPORTED)
+# find_package adds external restbed project - now we make sure it builds
+#add_dependencies(restbed_lib restbed) 
+#target_link_libraries
 
 # otl
 include_directories("${CMAKE_SOURCE_DIR}/dependency/otl")

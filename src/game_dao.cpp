@@ -1,6 +1,7 @@
 #include <ctime>
 #include <map>
 #include <set>
+#include <sstream>
 #include "game_dao.h"
 #include "game.h"
 #include "include_otl.h"

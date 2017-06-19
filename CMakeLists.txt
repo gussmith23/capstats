@@ -1,15 +1,26 @@
 cmake_minimum_required(VERSION 3.6)
 
 project(capstats)
-add_executable(capstats_server 
-		"src/game.cpp"
-		"src/game_dao.cpp"
-		"src/player.cpp"
-		"src/player_dao.cpp"
-		"src/points_dao.cpp"
-		"src/team_dao.cpp"
-		"src/capstats_server.cpp"
-		"src/main.cpp")
+
+set(SERVER_SOURCES
+      "src/game.cpp"
+      "src/game_dao.cpp"
+      "src/player.cpp"
+      "src/player_dao.cpp"
+      "src/points_dao.cpp"
+      "src/team_dao.cpp"
+      "src/capstats_server.cpp"
+      "src/game.h"
+      "src/game_dao.h"
+      "src/player.h"
+      "src/player_dao.h"
+      "src/points_dao.h"
+      "src/team_dao.h"
+      "src/capstats_server.h")
+set(TEST_SOURCES
+      "test/capstats_tests.cpp")
+      
+add_executable(capstats_server ${SERVER_SOURCES} "src/main.cpp")
 
 # make sure we get the right C++ version
 # TODO(gus) the first line shouldn't be needed, but is. fix it
@@ -53,9 +64,8 @@ find_package(Threads REQUIRED)
 target_link_libraries(capstats_server Threads::Threads)
 
 # tests
-file(GLOB CAPSTATS_TEST_SOURCES "test/*.cpp" "src/*")
-list(REMOVE_ITEM CAPSTATS_TEST_SOURCES "${CMAKE_SOURCE_DIR}/src/main.cpp")
-add_executable(capstats_tests ${CAPSTATS_TEST_SOURCES})
+add_executable(capstats_tests ${SERVER_SOURCES} ${TEST_SOURCES})
+add_dependencies(capstats_tests restbed)
 target_link_libraries(capstats_tests Catch)
 target_link_libraries(capstats_tests ${restbed_LIBRARY})
 target_link_libraries(capstats_tests ${ODBC_LIBRARIES})

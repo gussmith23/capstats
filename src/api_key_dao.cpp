@@ -5,16 +5,16 @@ void APIKeyDAO::init()
   *db << "create table if not exists keys (hash bigint)";
 }
 
-void addKey(const std::string key) 
+void APIKeyDAO::addKey(const std::string& key) const
 {
 }
 
-bool checkKey(const std::string key) 
+bool APIKeyDAO::checkKey(const std::string& key) const
 {
   return false;
 }
 
-void removeKey(const std::string key)
+void APIKeyDAO::removeKey(const std::string& key) const
 {
   
 }

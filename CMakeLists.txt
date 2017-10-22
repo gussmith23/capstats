@@ -10,6 +10,7 @@ set_property(GLOBAL PROPERTY CMAKE_CXX_STANDARD_REQUIRED ON)
 set_property(GLOBAL PROPERTY CMAKE_CXX_EXTENSIONS OFF)
 
 set(SERVER_SOURCES
+      "src/api_key_dao.cpp"
       "src/game.cpp"
       "src/game_dao.cpp"
       "src/player.cpp"

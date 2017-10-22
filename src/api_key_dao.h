@@ -9,11 +9,11 @@ class APIKeyDAO : DAO {
 
   void init();
   
-  void addKey(const std::string key) const;
+  void addKey(const std::string& key) const;
 
-  bool checkKey(const std::string key) const;
+  bool checkKey(const std::string& key) const;
 
-  void removeKey(const std::string key) const;
+  void removeKey(const std::string& key) const;
 };
 
 #endif // !API_KEY_DAO_H

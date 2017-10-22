@@ -1,6 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 #include "include_otl.h"
+#include "api_key_dao.h"
 #include "player_dao.h"
 #include "player.h"
 #include "game_dao.h"
@@ -360,6 +361,56 @@ TEST_CASE("Points DAO")
       REQUIRE(pointsDAO->updatePoints(1, in));
       multimap<int, int> out = pointsDAO->getPoints(1);
       REQUIRE(in == out);
+    }
+  }
+  catch (otl_exception e) {
+    cerr << e.msg << endl << e.stm_text << endl << e.var_info << endl;
+    FAIL();
+  }
+}
+
+TEST_CASE("API Key DAO")
+{
+  try {
+    otl_connect::otl_initialize();
+    shared_ptr<otl_connect> db(new otl_connect);
+    *db << "DRIVER=SQLite3 ODBC Driver;Database=:memory:;";
+
+    shared_ptr<APIKeyDAO> apiKeyDAO(new APIKeyDAO(db));
+    apiKeyDAO->init();
+
+    const std::string key = "key";
+
+    SECTION("Add key")
+    {
+      apiKeyDAO->addKey(key);
+    }
+
+    SECTION("Check existing key")
+    {
+      REQUIRE(apiKeyDAO->checkKey(key) == true);
+    }
+
+    SECTION("Check nonexistent key")
+    {
+      REQUIRE(apiKeyDAO->checkKey("") == false);
+      REQUIRE(apiKeyDAO->checkKey("not a key") == false);
+    }
+
+    SECTION("Remove key")
+    {
+      apiKeyDAO->removeKey(key);
+      REQUIRE(apiKeyDAO->checkKey(key) == false);
+    }
+
+    SECTION("Remove nonexistent key")
+    {
+      try {
+        apiKeyDAO->removeKey("not a key");
+        FAIL();
+      } catch (...) {
+        // TODO(gus): add exception
+      }
     }
   }
   catch (otl_exception e) {

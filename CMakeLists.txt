@@ -17,6 +17,8 @@ set(SERVER_SOURCES
       "src/player_dao.cpp"
       "src/points_dao.cpp"
       "src/team_dao.cpp"
+      # TODO(gus): I don't think this should go here.
+      "src/capstats_config.cpp"
       )
 
 #############EXTERNAL DEPENDENCIES#############################################
@@ -66,5 +68,5 @@ target_link_libraries(capstats_tests ${JSONBOX_LIBRARIES})
 target_link_libraries(capstats_tests Threads::Threads)
 
 enable_testing()
-add_test(NAME capstats_tests COMMAND capstats_tests)
+add_test(NAME capstats_tests COMMAND capstats_tests WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/test")
 add_test(NAME server_tests WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/test" COMMAND python -m unittest server_tests)

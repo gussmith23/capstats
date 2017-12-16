@@ -2,6 +2,7 @@
 #include "catch.hpp"
 #include "include_otl.h"
 #include "api_key_dao.h"
+#include "capstats_config.h"
 #include "player_dao.h"
 #include "player.h"
 #include "game_dao.h"
@@ -36,6 +37,12 @@ void gen_random(char *s, const int len) {
   }
 
   s[len] = 0;
+}
+
+TEST_CASE("config utility") {
+  CapstatsConfig config = CapstatsConfig::loadConfig("test_config_1.cfg");
+  REQUIRE(config.getDefaultUUIDs().size() == 1);
+  REQUIRE(config.getDefaultUUIDs()[0] == "123e4567-e89b-12d3-a456-426655440000");
 }
 
 TEST_CASE("Player DAO") {

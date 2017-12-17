@@ -24,6 +24,7 @@ void APIKeyDAO::addKey(const std::string& key,
       "(:key<char[36]>, :description<char[200]>)",
       *db);
   o << key;
+  // TODO(gus): I don't like this way of doing it. Maybe std::optional would be better?
   if (!description.empty())
     o << description;
   else

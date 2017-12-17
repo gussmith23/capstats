@@ -10,15 +10,15 @@ set_property(GLOBAL PROPERTY CMAKE_CXX_STANDARD_REQUIRED ON)
 set_property(GLOBAL PROPERTY CMAKE_CXX_EXTENSIONS OFF)
 
 set(SERVER_SOURCES
-      "src/api_key_dao.cpp"
-      "src/game.cpp"
-      "src/game_dao.cpp"
-      "src/player.cpp"
-      "src/player_dao.cpp"
-      "src/points_dao.cpp"
-      "src/team_dao.cpp"
+      "${CMAKE_SOURCE_DIR}/src/api_key_dao.cpp"
+      "${CMAKE_SOURCE_DIR}/src/game.cpp"
+      "${CMAKE_SOURCE_DIR}/src/game_dao.cpp"
+      "${CMAKE_SOURCE_DIR}/src/player.cpp"
+      "${CMAKE_SOURCE_DIR}/src/player_dao.cpp"
+      "${CMAKE_SOURCE_DIR}/src/points_dao.cpp"
+      "${CMAKE_SOURCE_DIR}/src/team_dao.cpp"
       # TODO(gus): I don't think this should go here.
-      "src/capstats_config.cpp"
+      "${CMAKE_SOURCE_DIR}/src/capstats_config.cpp"
       )
 
 #############EXTERNAL DEPENDENCIES#############################################
@@ -50,7 +50,7 @@ include_directories("${CMAKE_SOURCE_DIR}/src")
 
 add_library(capstats ${SERVER_SOURCES})
 
-add_executable(capstats_server "src/main.cpp" "src/capstats_server.cpp")
+add_executable(capstats_server "${CMAKE_SOURCE_DIR}/src/main.cpp" "${CMAKE_SOURCE_DIR}/src/capstats_server.cpp")
 target_link_libraries(capstats_server capstats)
 target_link_libraries(capstats_server ${restbed_LIBRARY})
 add_dependencies(capstats_server restbed)
@@ -58,7 +58,7 @@ target_link_libraries(capstats_server ${ODBC_LIBRARIES})
 target_link_libraries(capstats_server ${JSONBOX_LIBRARIES})
 target_link_libraries(capstats_server Threads::Threads)
 
-add_executable(capstats_tests "test/capstats_tests.cpp")
+add_executable(capstats_tests "${CMAKE_SOURCE_DIR}/test/capstats_tests.cpp")
 target_link_libraries(capstats_tests capstats)
 add_dependencies(capstats_tests restbed)
 target_link_libraries(capstats_tests Catch)

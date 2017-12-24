@@ -9,6 +9,12 @@ struct DefaultUUID {
   std::string description;
 };
 
+/**
+ * This class is not currently used, but may become useful in the future if we
+ * ever want the server to be aware of a unified config. Wrapping it up in a
+ * class might make it easier to enable the server to change config settings
+ * and write them back to a file, for example.
+ */
 class CapstatsConfig {
  public:
   CapstatsConfig(const std::vector<DefaultUUID>&);

@@ -192,3 +192,6 @@ class Tests(unittest.TestCase):
     json = r.json()
 
     self.assertEqual(len(json), 0)
+
+if __name__ == '__main__':
+    unittest.main()

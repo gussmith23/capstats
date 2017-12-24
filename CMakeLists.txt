@@ -74,7 +74,7 @@ enable_testing()
 add_test(NAME capstats_tests COMMAND capstats_tests)
 add_custom_target(copy-test-config-1 DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/test_config_1.cfg")
 add_dependencies(capstats_tests copy-test-config-1)
-add_test(NAME server_tests COMMAND python -m unittest server_tests)
+add_test(NAME server_tests COMMAND python "${CMAKE_SOURCE_DIR}/test/server_tests.py")
 
 # add rules for each test resource. these rules will copy the test resource to the build dir when needed.
 if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)

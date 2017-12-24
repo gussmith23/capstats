@@ -281,6 +281,11 @@ void CapstatsServer::init() {
     cerr << p.stm_text << endl; // print out SQL that caused the error
     cerr << p.var_info << endl; // print out the variable that caused the error
   }
+
+  // Add default UUIDs.
+  for (DefaultUUID defaultUUID : defaultUUIDs) {
+    apiKeyDAO->addKey(defaultUUID.uuid, defaultUUID.description);
+  }
 }
 
 int CapstatsServer::run() {

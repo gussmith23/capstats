@@ -11,9 +11,17 @@
 #include <string>
 #include <vector>
 
+struct DefaultUUID {
+  std::string uuid;
+  std::string description;
+};
+
 class CapstatsServer {
 public:
-	CapstatsServer(uint16_t port, std::string databasePath) :
+	CapstatsServer(uint16_t port, 
+                        std::string databasePath, 
+                        const std::vector<DefaultUUID>& defaultUUIDs) :
+                defaultUUIDs(defaultUUIDs),
 		databasePath(databasePath),
 		port(port),
 		db(std::shared_ptr<otl_connect>(new otl_connect)),
@@ -80,6 +88,8 @@ private:
 	std::string databasePath;
 
 	std::shared_ptr<otl_connect> db;
+
+        std::vector<DefaultUUID> defaultUUIDs;
 	
 	std::shared_ptr<PlayerDAO> playerDAO;
 	std::shared_ptr<TeamDAO> teamDAO;

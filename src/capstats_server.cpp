@@ -289,7 +289,6 @@ void CapstatsServer::init() {
 
 int CapstatsServer::run() {
 
-
   auto playerWithId = make_shared<Resource>();
   playerWithId->set_path("/player/{id: [0-9]+}");
   playerWithId->set_method_handler("GET", bind1st(mem_fun(&CapstatsServer::player_get_json), this));
@@ -307,8 +306,6 @@ int CapstatsServer::run() {
   game->set_path("/game");
   game->set_method_handler("POST", bind1st(mem_fun(&CapstatsServer::game_post_json), this));
   game->set_method_handler("GET", bind1st(mem_fun(&CapstatsServer::gameWithoutId_get_json), this));
-
-
 
   auto settings = make_shared< Settings >();
   settings->set_port(port);

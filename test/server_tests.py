@@ -10,10 +10,11 @@ import signal
 player_url = 'http://localhost:23232/player'
 game_url =  'http://localhost:23232/game'
 
+# TODO(gus): this is really dumb. this stuff can probably be passed by CMake.
 server_path = ""
 if (os.name == "nt"): server_path = r'..\build\Debug\capstats_server.exe'
 elif (os.name == "posix"): server_path = r"../build/capstats_server" #todo: what should this be?
- 
+  
 class Tests(unittest.TestCase):  
     
   # comment these out when you want to debug the server. start the server (using 
@@ -21,7 +22,7 @@ class Tests(unittest.TestCase):
   # some tests will only work with this stuff uncommented OR if you restart the
   # server each time you run the tests.
   def setUp(self):
-    self.p = subprocess.Popen(server_path)
+    self.p = subprocess.Popen([server_path, "test_config_1.cfg"])
     time.sleep(.01)
     
   def tearDown(self):

@@ -25,6 +25,7 @@ using namespace std;
 // i fixed it by making the buffer 1 for all of them, but it's not a satisfying
 // fix.
 
+/* TODO(gus): remove completely when comfortable
 // from http://stackoverflow.com/questions/440133/how-do-i-create-a-random-alpha-numeric-string-in-c
 void gen_random(char *s, const int len) {
   static const char alphanum[] =
@@ -37,13 +38,7 @@ void gen_random(char *s, const int len) {
   }
 
   s[len] = 0;
-}
-
-TEST_CASE("config utility") {
-  CapstatsConfig config = CapstatsConfig::loadConfig("test_config_1.cfg");
-  REQUIRE(config.getDefaultUUIDs().size() == 1);
-  REQUIRE(config.getDefaultUUIDs()[0] == "123e4567-e89b-12d3-a456-426655440000");
-}
+}*/
 
 TEST_CASE("Player DAO") {
   otl_connect::otl_initialize();

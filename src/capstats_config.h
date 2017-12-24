@@ -4,13 +4,26 @@
 #include <string>
 #include <vector>
 
+struct DefaultUUID {
+  std::string uuid;
+  std::string description;
+};
+
 class CapstatsConfig {
  public:
-  CapstatsConfig(const std::vector<std::string>&);
-  static CapstatsConfig loadConfig(const std::string& filename);
-  const std::vector<std::string>& getDefaultUUIDs() { return defaultUUIDs; }
+  CapstatsConfig(const std::vector<DefaultUUID>&);
+
+  /**
+   * Construct a config from a given filename.
+   */
+  CapstatsConfig(const std::string&);
+
+  // TODO(gus) add default constructor which initializes to default config values.
+
+  const std::vector<DefaultUUID>& getDefaultUUIDs() 
+      { return defaultUUIDs; }
  private:
-  std::vector<std::string> defaultUUIDs;
+  std::vector<DefaultUUID> defaultUUIDs;
 };
 
 #endif // CAPSTATS_CONFIG_H

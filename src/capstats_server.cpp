@@ -274,9 +274,8 @@ void CapstatsServer::init() {
     gameDAO->init();
     teamDAO->init();
     pointsDAO->init();
-  }
-
-  catch (otl_exception& p) { // intercept OTL exceptions
+    apiKeyDAO->init();
+  } catch (otl_exception& p) { // intercept OTL exceptions
     cerr << p.msg << endl; // print out error message
     cerr << p.stm_text << endl; // print out SQL that caused the error
     cerr << p.var_info << endl; // print out the variable that caused the error

@@ -391,6 +391,14 @@ TEST_CASE("API Key DAO")
       REQUIRE(apiKeyDAO->checkKey(key) == false);
     }
 
+    SECTION("Add key with description")
+    {
+      apiKeyDAO->addKey("testkey2", "my second test key");
+      REQUIRE(apiKeyDAO->checkKey("testkey2") == true);
+      apiKeyDAO->removeKey("testkey2");
+      REQUIRE(apiKeyDAO->checkKey("testkey2") == false);
+    }
+
     SECTION("Check nonexistent key")
     {
       REQUIRE(apiKeyDAO->checkKey("") == false);

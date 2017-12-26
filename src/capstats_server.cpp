@@ -28,15 +28,29 @@ using namespace std;
 using namespace restbed;
 using namespace JsonBox;
 
+bool CapstatsServer::authenticate(const std::shared_ptr<const Request> request) {
+  if (!checkAPIKeys) return true;
+  // TODO(gus): make the parameter name a constant
+  else if (request->has_query_parameter("key") && apiKeyDAO->checkKey(request->get_query_parameter("key")))
+    return true;
+  else return false;
+}
+
 void CapstatsServer::player_post_json( const shared_ptr< Session > session )
 {
   const auto request = session->get_request( );
+
+  if (!authenticate(request)) {
+    session->close(FORBIDDEN);
+    return;
+  }
 
   int content_length = request->get_header( "Content-Length", 0);
 
   session->fetch( content_length, [this]( const shared_ptr< Session > session, const Bytes & body )
       {
       try {
+
       Value player;
       player.loadFromString(string(body.begin(), body.end()));
 
@@ -175,6 +189,11 @@ void CapstatsServer::playerWithoutId_get_json(const std::shared_ptr<restbed::Ses
 void CapstatsServer::player_put_json(const std::shared_ptr<restbed::Session> session)
 {
   const auto request = session->get_request();
+
+  if (!authenticate(request)) {
+    session->close(FORBIDDEN);
+    return;
+  }
 
   int content_length = request->get_header("Content-Length", 0);
 
@@ -378,6 +397,11 @@ void CapstatsServer::game_post_json(const std::shared_ptr<restbed::Session> sess
 {
   const auto request = session->get_request();
 
+  if (!authenticate(request)) {
+    session->close(FORBIDDEN);
+    return;
+  }
+
   int content_length = request->get_header("Content-Length", 0);
 
   session->fetch(content_length, [this](const shared_ptr< Session > session, const Bytes & body)
@@ -481,6 +505,11 @@ void CapstatsServer::gameWithoutId_get_json(const std::shared_ptr<restbed::Sessi
 void CapstatsServer::game_put_json(const std::shared_ptr<restbed::Session> session)
 {
   const auto request = session->get_request();
+
+  if (!authenticate(request)) {
+    session->close(FORBIDDEN);
+    return;
+  }
 
   int content_length = request->get_header("Content-Length", 0);
 

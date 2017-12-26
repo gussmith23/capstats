@@ -15,14 +15,92 @@ server_path = ""
 if (os.name == "nt"): server_path = r'..\build\Debug\capstats_server.exe'
 elif (os.name == "posix"): server_path = r"../build/capstats_server" #todo: what should this be?
   
-class Tests(unittest.TestCase):  
+class AuthenticatedTests(unittest.TestCase):
+  key = "6f601a72-e9b7-11e7-80c1-9a214cf093ae"
+  
+
+  def setUp(self):
+    self.p = subprocess.Popen([server_path, "--key", AuthenticatedTests.key])
+    time.sleep(.01)
+    
+  def tearDown(self):
+    self.p.terminate()
+    self.p.wait()
+    self.p = None
+
+  def test_add_get_update_game_authenticated(self):
+    post_params = {
+      'teams': {
+        '1' : [1,2,3],
+        '2' : [4,5,6]
+      },
+      'points': {
+        '1' : 11,
+        '2' : 9
+      }
+    }
+
+    params = {
+      'key' : AuthenticatedTests.key
+    }
+
+    r = requests.post(game_url, json = post_params, params = params)
+    json = r.json()
+    
+    self.assertTrue(json['id'] >= 0)
+    
+    for key in post_params.keys():
+      self.assertEqual(post_params[key], json[key])
+
+    r = requests.get(game_url + "/" + str(json['id']))
+    json = r.json()
+    for key in post_params.keys():
+      self.assertEqual(post_params[key], json[key])
+    
+    post_params['teams']['3'] = [7,8,9]
+    post_params['points']['3'] = 6
+    
+    r = requests.put(game_url + "/" + str(json['id']), json = post_params, params = params)
+
+    r = requests.get(game_url + "/" + str(json['id']))
+    json = r.json()
+    for key in post_params.keys():
+      self.assertEqual(post_params[key], json[key])
+
+  def test_not_authenticated(self):
+    post_params = {
+      'teams': {
+        '1' : [1,2,3],
+        '2' : [4,5,6]
+      },
+      'points': {
+        '1' : 11,
+        '2' : 9
+      }
+    }
+
+    params = {
+      'key' : "this is not a valid key"
+    }
+
+    r = requests.post(game_url, json = post_params, params = params)
+    self.assertEqual(r.status_code, 403)
+  
+
+# These tests are performed on a server with authentication disabled.
+# TODO(gus): evaluate whether it makes sense to continue doing this. The only
+# reason I'm doing it now is because authentication was not implemented at
+# first. Thus, to make these tests work, we'd have to add a key (which is easy;
+# just use the test config file) and we'd have to then add that key to every
+# PUT or POST request. It wouldn't be that much work.
+class UnauthenticatedTests(unittest.TestCase):  
     
   # comment these out when you want to debug the server. start the server (using 
   # visual studio for example) and then run the tests.
   # some tests will only work with this stuff uncommented OR if you restart the
   # server each time you run the tests.
   def setUp(self):
-    self.p = subprocess.Popen([server_path, "test_config_1.cfg"])
+    self.p = subprocess.Popen([server_path, "--disableAPIKeys"])
     time.sleep(.01)
     
   def tearDown(self):

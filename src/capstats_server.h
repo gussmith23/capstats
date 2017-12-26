@@ -22,7 +22,9 @@ class CapstatsServer {
 public:
 	CapstatsServer(uint16_t port, 
                         std::string databasePath, 
-                        const std::vector<DefaultUUID>& defaultUUIDs) :
+                        const std::vector<DefaultUUID>& defaultUUIDs,
+                        bool checkAPIKeys) :
+                checkAPIKeys(checkAPIKeys),
                 defaultUUIDs(defaultUUIDs),
 		databasePath(databasePath),
 		port(port),
@@ -89,12 +91,20 @@ public:
 	void gameWithoutId_get_json(const std::shared_ptr<restbed::Session> session);
 
 private:
+        /**
+         * Returns true if authentication is not needed, or if authentication is needed
+         * and the API key attached is valid. Otherwise, returns false.
+         */
+        bool authenticate(const std::shared_ptr<const restbed::Request> request);
+
 	uint16_t port;
 	std::string databasePath;
 
 	std::shared_ptr<otl_connect> db;
 
         std::vector<DefaultUUID> defaultUUIDs;
+
+        bool checkAPIKeys;
 	
 	std::shared_ptr<PlayerDAO> playerDAO;
 	std::shared_ptr<TeamDAO> teamDAO;

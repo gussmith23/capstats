@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <cstdlib>
+#include <glog/logging.h>
 
 #include <sql.h>
 #include <sqltypes.h>
@@ -29,11 +30,24 @@ using namespace restbed;
 using namespace JsonBox;
 
 bool CapstatsServer::authenticate(const std::shared_ptr<const Request> request) {
-  if (!checkAPIKeys) return true;
-  // TODO(gus): make the parameter name a constant
-  else if (request->has_query_parameter("key") && apiKeyDAO->checkKey(request->get_query_parameter("key")))
+  if (!checkAPIKeys) {
+    LOG(INFO) << "No key required.";
     return true;
-  else return false;
+  }
+  // TODO(gus): make the parameter name a constant
+  else if (request->has_query_parameter("key")) {
+    LOG(INFO) << "Key: " << request->get_query_parameter("key");
+    if ( apiKeyDAO->checkKey(request->get_query_parameter("key"))) {
+      LOG(INFO) << "Key found!";
+      return true;
+    } else {
+      LOG(INFO) << "Key not found.";
+      return false;
+    }
+  } else {
+    LOG(INFO) << "Key required, but no key provided.";
+    return false;
+  }
 }
 
 void CapstatsServer::player_post_json( const shared_ptr< Session > session )

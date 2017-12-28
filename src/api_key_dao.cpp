@@ -18,7 +18,10 @@ void APIKeyDAO::addKey(const std::string& key,
                         const std::string& description) const
 {
   otl_stream o(1,
-      "insert into keys "
+      // TODO(gus): duplicate keys are ignored, which is good for server startup
+      // (when the server will try to add the default keys) but bad in the case
+      // where someone is actually trying to add a new key. 
+      "insert or ignore into keys "
       "(key, description)"
       " values "
       // TODO(gus): magic number

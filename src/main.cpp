@@ -1,5 +1,6 @@
 #include <argp.h>
 #include <cstdlib>
+#include <glog/logging.h>
 #include <string>
 #include <vector>
 
@@ -70,6 +71,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
 static struct argp argp = { options, parse_opt, args_doc, doc };
 
 int main(int argc, char** argv) {
+   google::InitGoogleLogging(argv[0]);
 
   // Default server settings.
   // TODO(gus): these should be defined within CapstatsServer itself. However,

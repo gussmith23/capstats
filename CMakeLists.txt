@@ -24,6 +24,10 @@ set(SERVER_SOURCES
 #############EXTERNAL DEPENDENCIES#############################################
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
+# glog
+find_package(Glog REQUIRED)
+include_directories(${GLOG_INCLUDE_DIRS})
+
 # restbed
 find_package(restbed REQUIRED)
 include_directories(${restbed_INCLUDE})
@@ -57,6 +61,7 @@ add_dependencies(capstats_server restbed)
 target_link_libraries(capstats_server ${ODBC_LIBRARIES})
 target_link_libraries(capstats_server ${JSONBOX_LIBRARIES})
 target_link_libraries(capstats_server Threads::Threads)
+target_link_libraries(capstats_server ${GLOG_LIBRARIES})
 
 set(CAPSTATS_TEST_SOURCES
       "${CMAKE_SOURCE_DIR}/test/capstats_tests.cpp"

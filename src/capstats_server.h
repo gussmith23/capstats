@@ -3,6 +3,7 @@
 
 #include "api_key_dao.h"
 #include "player_dao.h"
+#include "player_points_dao.hpp"
 #include "game_dao.h"
 #include "team_dao.h"
 #include "JsonBox.h"
@@ -31,6 +32,7 @@ public:
 		db(std::shared_ptr<otl_connect>(new otl_connect)),
 		teamDAO(std::shared_ptr<TeamDAO>(new TeamDAO(db))),
 		pointsDAO(std::shared_ptr<PointsDAO>(new PointsDAO(db))),
+		playerPointsDAO(std::shared_ptr<PlayerPointsDAO>(new PlayerPointsDAO(db))),
 		playerDAO(std::shared_ptr<PlayerDAO>(new PlayerDAO(db))),
 		gameDAO(std::shared_ptr<GameDAO>(new GameDAO(db, teamDAO, pointsDAO))),
                 apiKeyDAO(std::make_shared<APIKeyDAO>(db)) 
@@ -109,6 +111,7 @@ private:
 	std::shared_ptr<PlayerDAO> playerDAO;
 	std::shared_ptr<TeamDAO> teamDAO;
 	std::shared_ptr<PointsDAO> pointsDAO;
+	std::shared_ptr<PlayerPointsDAO> playerPointsDAO;
         std::shared_ptr<GameDAO> gameDAO;
 	std::shared_ptr<APIKeyDAO> apiKeyDAO;
 

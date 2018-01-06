@@ -16,6 +16,7 @@ set(SERVER_SOURCES
       "${CMAKE_SOURCE_DIR}/src/player.cpp"
       "${CMAKE_SOURCE_DIR}/src/player_dao.cpp"
       "${CMAKE_SOURCE_DIR}/src/points_dao.cpp"
+      "${CMAKE_SOURCE_DIR}/src/player_points_dao.cpp"
       "${CMAKE_SOURCE_DIR}/src/team_dao.cpp"
       # TODO(gus): I don't think this should go here.
       "${CMAKE_SOURCE_DIR}/src/capstats_config.cpp"

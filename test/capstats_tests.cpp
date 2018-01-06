@@ -9,6 +9,7 @@
 #include "game.h"
 #include "team_dao.h"
 #include "points_dao.h"
+#include "player_points_dao.hpp"
 #include "capstats_exceptions.h"
 #include <iostream>
 #include <string>
@@ -362,6 +363,41 @@ TEST_CASE("Points DAO")
       in.insert(pair<int, long>(5, 6));
       REQUIRE(pointsDAO->updatePoints(1, in));
       multimap<int, int> out = pointsDAO->getPoints(1);
+      REQUIRE(in == out);
+    }
+  }
+  catch (otl_exception e) {
+    cerr << e.msg << endl << e.stm_text << endl << e.var_info << endl;
+    FAIL();
+  }
+}
+
+TEST_CASE("Player Points DAO")
+{
+  try {
+    otl_connect::otl_initialize();
+    shared_ptr<otl_connect> db(new otl_connect);
+    *db << "DRIVER=SQLite3 ODBC Driver;Database=:memory:;";
+
+    // TODO(gus): when foreign keys work, we'll need to instantiate more DAOs.
+    shared_ptr<PlayerPointsDAO> playerPointsDAO(new PlayerPointsDAO(db));
+    playerPointsDAO->init();
+
+    SECTION("Add and get points.")
+    {
+      multimap<int, int> in = { { 1,2 }, { 2,3 } };
+      playerPointsDAO->addPoints(1, in);
+      multimap<int, int> out = playerPointsDAO->getPoints(1);
+      REQUIRE(in == out);
+    }
+
+    SECTION("Update points")
+    {
+      multimap<int, int> in = { { 1,2 }, { 0, 69 }, { 4, 10 } };
+      playerPointsDAO->addPoints(1, in);
+      in.insert(pair<int, long>(5, 6));
+      REQUIRE(playerPointsDAO->updatePoints(1, in));
+      multimap<int, int> out = playerPointsDAO->getPoints(1);
       REQUIRE(in == out);
     }
   }

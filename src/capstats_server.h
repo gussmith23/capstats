@@ -75,7 +75,7 @@ public:
 	 *			teamid : [playerid, playerid, playerid, ...],
 	 *			...
 	 *		},
-	 *		scores : {
+	 *		points : {
 	 *			teamid : score,
 	 *			teamid : score,
 	 *			...

@@ -307,6 +307,7 @@ void CapstatsServer::init() {
     gameDAO->init();
     teamDAO->init();
     pointsDAO->init();
+    playerPointsDAO->init();
     apiKeyDAO->init();
   } catch (otl_exception& p) { // intercept OTL exceptions
     cerr << p.msg << endl; // print out error message
@@ -375,6 +376,9 @@ JsonBox::Value CapstatsServer::gameToJson(const Game & game)
   for (const auto& pair : game.getPoints())
     out["points"][::to_string(pair.first)] = pair.second;
 
+  for (const auto& pair : game.getPlayerPoints())
+    out["playerpoints"][::to_string(pair.first)] = pair.second;
+
   return out;
 }
 
@@ -403,6 +407,11 @@ Game CapstatsServer::jsonToGame(const JsonBox::Value & json)
   for (auto i : obj["points"].getObject())
     points.insert(pair<int, int>(::stoi(i.first), i.second.getInteger()));
   out.setPoints(points);
+
+  multimap<int, int> playerPoints;
+  for (auto i : obj["playerpoints"].getObject())
+    playerPoints.insert(pair<int,int>(::stoi(i.first), i.second.getInteger()));
+  out.setPlayerPoints(playerPoints);
 
   return out;
 }

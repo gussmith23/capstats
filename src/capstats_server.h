@@ -34,7 +34,7 @@ public:
 		pointsDAO(std::shared_ptr<PointsDAO>(new PointsDAO(db))),
 		playerPointsDAO(std::shared_ptr<PlayerPointsDAO>(new PlayerPointsDAO(db))),
 		playerDAO(std::shared_ptr<PlayerDAO>(new PlayerDAO(db))),
-		gameDAO(std::shared_ptr<GameDAO>(new GameDAO(db, teamDAO, pointsDAO))),
+		gameDAO(std::shared_ptr<GameDAO>(new GameDAO(db, teamDAO, pointsDAO, playerPointsDAO))),
                 apiKeyDAO(std::make_shared<APIKeyDAO>(db)) 
                 {}
 
@@ -80,6 +80,10 @@ public:
 	 *			teamid : score,
 	 *			...
 	 *		},
+         *              playerpoints : {
+         *                      playerid : score,
+         *                      ...
+        *               },
 	 *		time : time
 	 *	}
 	 */

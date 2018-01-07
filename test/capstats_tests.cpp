@@ -186,7 +186,9 @@ TEST_CASE("Game DAO") {
   teamDAO->init();
   shared_ptr<PointsDAO> pointsDAO(new PointsDAO(db));
   pointsDAO->init();
-  shared_ptr<GameDAO> gameDAO(new GameDAO(db, teamDAO, pointsDAO));
+  shared_ptr<PlayerPointsDAO> playerPointsDAO(new PlayerPointsDAO(db));
+  playerPointsDAO->init();
+  shared_ptr<GameDAO> gameDAO(new GameDAO(db, teamDAO, pointsDAO, playerPointsDAO));
   gameDAO->init();
 
   SECTION("Games added to and retrieved from database") {
@@ -198,6 +200,8 @@ TEST_CASE("Game DAO") {
       g.setTeams(teams);
       multimap<int, int> points = { {1,9}, {3, 11}, {200, 20000} };
       g.setPoints(points);
+      multimap<int, int> playerPoints = { {2,1}, {4,2}, {5,3}, {7,4} };
+      g.setPlayerPoints(playerPoints);
 
       REQUIRE(gameDAO->addGame(g) == true);
       REQUIRE(g.getId() != idBeforeAdd);
@@ -206,6 +210,7 @@ TEST_CASE("Game DAO") {
       REQUIRE(out.getTime() == 23);
       REQUIRE(out.getTeams() == teams);
       REQUIRE(out.getPoints() == points);
+      REQUIRE(out.getPlayerPoints() == playerPoints);
     }
     catch (otl_exception e) {
       cout << e.msg << endl;
@@ -236,6 +241,8 @@ TEST_CASE("Game DAO") {
     g.setTeams(teams);
     multimap<int, int> points = { { 1,9 },{ 3, 11 },{ 200, 20000 } };
     g.setPoints(points);
+    multimap<int, int> playerPoints = { {2,1}, {4,2}, {5,3}, {7,4} };
+    g.setPlayerPoints(playerPoints);
     gameDAO->addGame(g);
 
     teams.insert(pair<int, long>(8, 9));
@@ -249,6 +256,7 @@ TEST_CASE("Game DAO") {
     REQUIRE(out.getTime() == g.getTime());
     REQUIRE(out.getTeams() == g.getTeams());
     REQUIRE(out.getPoints() == g.getPoints());
+    REQUIRE(out.getPlayerPoints() == g.getPlayerPoints());
   }
 
   SECTION("find games, games present") {
@@ -258,6 +266,8 @@ TEST_CASE("Game DAO") {
     g.setTeams(teams);
     multimap<int, int> points = { { 1,9 },{ 3, 11 },{ 200, 20000 } };
     g.setPoints(points);
+    multimap<int, int> playerPoints = { {2,1}, {4,2}, {5,3}, {7,4} };
+    g.setPlayerPoints(playerPoints);
     gameDAO->addGame(g);
     g.setTime(24);
     g.setId(-1);
@@ -274,6 +284,8 @@ TEST_CASE("Game DAO") {
     g.setTeams(teams);
     multimap<int, int> points = { { 1,9 },{ 3, 11 },{ 200, 20000 } };
     g.setPoints(points);
+    multimap<int, int> playerPoints = { {2,1}, {4,2}, {5,3}, {7,4} };
+    g.setPlayerPoints(playerPoints);
     gameDAO->addGame(g);
     long id = g.getId();
     g.setId(-1);

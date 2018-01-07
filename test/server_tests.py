@@ -18,7 +18,6 @@ elif (os.name == "posix"): server_path = r"../build/capstats_server" #todo: what
 class AuthenticatedTests(unittest.TestCase):
   key = "6f601a72-e9b7-11e7-80c1-9a214cf093ae"
   
-
   def setUp(self):
     self.p = subprocess.Popen([server_path, "--key", AuthenticatedTests.key])
     time.sleep(.01)
@@ -37,6 +36,10 @@ class AuthenticatedTests(unittest.TestCase):
       'points': {
         '1' : 11,
         '2' : 9
+      },
+      'playerpoints': {
+        '1' : 1,
+        '5' : 5
       }
     }
 
@@ -59,6 +62,7 @@ class AuthenticatedTests(unittest.TestCase):
     
     post_params['teams']['3'] = [7,8,9]
     post_params['points']['3'] = 6
+    post_params['playerpoints']['3'] = 3
     
     r = requests.put(game_url + "/" + str(json['id']), json = post_params, params = params)
 

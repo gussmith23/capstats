@@ -5,12 +5,15 @@
 #include "game.h"
 #include "team_dao.h"
 #include "points_dao.h"
+#include "player_points_dao.hpp"
 #include <memory>
 #include <vector>
 
 class GameDAO : DAO {
   public:
-    GameDAO(std::shared_ptr<otl_connect> db, std::shared_ptr<TeamDAO> teamDAO, std::shared_ptr<PointsDAO> pointsDAO) : DAO(db), teamDAO(teamDAO), pointsDAO(pointsDAO) { };
+    GameDAO(std::shared_ptr<otl_connect> db, std::shared_ptr<TeamDAO> teamDAO,
+            std::shared_ptr<PointsDAO> pointsDAO, std::shared_ptr<PlayerPointsDAO> playerPointsDAO) : 
+              DAO(db), teamDAO(teamDAO), pointsDAO(pointsDAO), playerPointsDAO(playerPointsDAO) { };
 
     void init();
 
@@ -48,6 +51,7 @@ class GameDAO : DAO {
   private:
     std::shared_ptr<TeamDAO> teamDAO;
     std::shared_ptr<PointsDAO> pointsDAO;
+    std::shared_ptr<PlayerPointsDAO> playerPointsDAO;
 };
 
 #endif // !GAME_DAO_H

@@ -29,12 +29,14 @@ Game GameDAO::getGame(long gameId) const
 
 	multimap<int, long> teams = teamDAO->getTeams(gameId);
 	multimap<int, int> points = pointsDAO->getPoints(gameId);
+	multimap<int, int> playerPoints = playerPointsDAO->getPoints(gameId);
 
 	Game out; 
 	out.setId(gameId);
 	out.setTime(timestamp);
 	out.setTeams(teams);
 	out.setPoints(points);
+	out.setPlayerPoints(playerPoints);
 
 	return out;
 }
@@ -61,7 +63,8 @@ bool GameDAO::addGame(Game &game) const
 	if (teamDAO->addTeams(game.getId(), game.getTeams()) == false) return false;
 
 	// and then the points...
-	if (pointsDAO->addPoints(game.getId(), game.getPoints()) == false) return false;
+        if (pointsDAO->addPoints(game.getId(), game.getPoints()) == false) return false;
+	if (playerPointsDAO->addPoints(game.getId(), game.getPlayerPoints()) == false) return false;
 
 	return true;
 }
@@ -70,6 +73,7 @@ bool GameDAO::updateGame(const Game & game) const
 {
 	if (!teamDAO->updateTeams(game.getId(), game.getTeams())) return false;
 	if (!pointsDAO->updatePoints(game.getId(), game.getPoints())) return false;
+	if (!playerPointsDAO->updatePoints(game.getId(), game.getPlayerPoints())) return false;
 	
 	try {
 		otl_stream update(1,
